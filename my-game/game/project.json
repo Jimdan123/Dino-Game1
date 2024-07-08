@@ -1,0 +1,19 @@
+{
+    "debugMode" : 1,
+    "noCache": false,
+    "showFPS" : true,
+    "frameRate" : 30,
+    "id" : "gameCanvas",
+    "renderMode" : 0,
+    "engineDir":"../engine",
+
+    "modules" : ["cocos2d"],
+
+    "jsList" : [
+        "src/resource.js",
+        "src/myApp.js",
+        "src/sqrt.js",
+        "src/my_module.js",
+        "src/NewApp.js" 
+    ]
+}
