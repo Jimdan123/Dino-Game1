@@ -7,8 +7,7 @@ cc.game.onStart = function() {
         document.body.removeChild(document.getElementById("cocosLoading"));
     }
         
-    var designSize = cc.size(480, 800);
-
+    var designSize = cc.size(800, 800);
     //var screenSize = cc.view.getFrameSize();
 
     // set resource path
@@ -20,7 +19,7 @@ cc.game.onStart = function() {
     cc.LoaderScene.preload(g_resources, function () {
 
         // if load resources success, run this scene
-        cc.director.runScene(new KhangScene());
+        cc.director.runScene(new dinoScene());
 
     }, this);
 };
