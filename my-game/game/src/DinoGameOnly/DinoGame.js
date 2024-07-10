@@ -83,6 +83,7 @@ var dl = {
     },
     changeStateToRunning: function()
     {
+        this.helloLabel.setVisible(false);
         this.gameState = "running";
         this.spriteDino.setVisible(true); 
         this.spriteCloud.setVisible(true);
