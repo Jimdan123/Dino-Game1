@@ -12,9 +12,14 @@ var dl = {
         // 1. super init first
         var size = cc.director.getWinSize();
         this._super();
-        // cc.log("onKeyPressed");
+        // cc.log("onKeyPressed"); 
         this.gameState = "mainMenu";
         cc.log(this.gameState);
+        var givenNumbers = 999999; 
+        var scaleLength = 1; 
+        var scaleWidth = 1; 
+        var posX = 800; 
+        var posY = 350;
         if ('keyboard' in cc.sys.capabilities)
             {
                 var keyboardListener =
@@ -22,12 +27,22 @@ var dl = {
                     event: cc.EventListener.KEYBOARD,
                     onKeyPressed: function(key, event)
                     {
-                        keyPressed = key;
+                        var ld_inst = event.getCurrentTarget();
+                        ld_inst.changeStateToRunning();
                     }
                 };
                 cc.eventManager.addListener(keyboardListener, this);
             }
-
+        cc.spriteFrameCache.addSpriteFrames(numberPos, number);
+        this.allDigits = new Array(6); 
+        for (var i = 0; i < 6; i++)
+        {
+            this.allDigits[i] = new cc.Sprite("#number_0.png");
+            this.allDigits[i].setPosition(posX,posY); 
+            this.allDigits[i].setScale(scaleLength,scaleWidth); 
+            this.addChild(this.allDigits[i],10);
+            posX += 30;
+        }
         // this.removeChild(this.sprite);
         cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
         this.sprite = new cc.Sprite("#track.png");
@@ -40,15 +55,31 @@ var dl = {
         this.backGroundAtStart();
         this.createDino(this.spriteDino);
         this.gameStart();
+        this.theNumber(givenNumbers,posX,posY,scaleLength,scaleWidth);
         // get screen size
         // add "Helloworld" splash screen"
         
+    },
+    theNumber: function(givenNumbers,posX,posY,scaleLength,scaleWidth)
+    {
+        for (var i = 0; i < 6; i++)
+        {
+            var tmp = givenNumbers % 10;  
+            var frameName = "number_" +  tmp + ".png";
+            this.allDigits[i].setSpriteFrame(frameName);
+            givenNumbers = parseInt(givenNumbers / 10);
+        }   
     },
     gameStart: function()
     {
         this.sprite.setVisible(false); 
         this.spriteCloud.setVisible(false); 
         this.spriteDino.setVisible(false);
+        // this.allDigits.setVisible(false);
+        for(var i = 0; i < this.allDigits.length; i++)
+        {
+            this.allDigits[i].setVisible(false);
+        }
     },
     changeStateToRunning: function()
     {
@@ -57,6 +88,10 @@ var dl = {
         this.spriteCloud.setVisible(true);
         this.sprite.setVisible(true);
         cc.log("changeStateToRunning");
+        for(var i = 0; i < this.allDigits.length; i++)
+        {
+            this.allDigits[i].setVisible(true);
+        }
     },
 
     Label:function(size)
@@ -99,16 +134,16 @@ var dl = {
     },
     update: function(dt)
     {
-        if (keyPressed == 65)
-        {
-            if (this.gameState == "mainMenu")
-            {
-                this.changeStateToRunning();
-            }
+        // if (keyPressed == 65)
+        // {
+        //     if (this.gameState == "mainMenu")
+        //     {
+        //         this.changeStateToRunning();
+        //     }
             
-            //show = true;
-            //dl.visibleAtStart(show,this.sprite,this.spriteCloud,this.spriteDino);
-        }
+        //     //show = true;
+        //     //dl.visibleAtStart(show,this.sprite,this.spriteCloud,this.spriteDino);
+        // }
 
         //this.show = false;
         if (this.gameState == "mainMenu")
