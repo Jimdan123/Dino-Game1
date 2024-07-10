@@ -81,6 +81,10 @@ var dl = {
             this.allDigits[i].setVisible(false);
         }
     },
+    changingNumber: function()
+    {
+
+    },
     changeStateToRunning: function()
     {
         this.helloLabel.setVisible(false);
