@@ -15,6 +15,7 @@ var gameOverPos = "assignment/other/other_sheet.plist";
 var bird = "assignment/bird/bird_sheet.png"; 
 var birdPos = "assignment/bird/bird_sheet.plist"; 
 var dinoScreen = "White.jpg"; 
+var dino_wallpaper = "assignment/dino_wallpaper.png";
 var g_resources = [
     //image
     s_HelloWorld,
@@ -27,6 +28,7 @@ var g_resources = [
     gameOver,
     bird,
     cactus,
+    dino_wallpaper,
     //plist
     CowAndCrowingPos,
     cactusPos,
