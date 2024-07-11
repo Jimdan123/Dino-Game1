@@ -167,6 +167,7 @@ var dl = cc.Layer.extend({
         //var cancleMotion = cc.sequence(cc.moveTo(200, 200), cc.callFunc(this.duck), this);
         //this.spriteDino.runAction(cancleMotion);
        
+    },
 
     endJump: function() {
             this.dinoState = "run";
