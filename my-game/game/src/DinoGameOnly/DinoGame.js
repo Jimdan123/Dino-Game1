@@ -7,11 +7,54 @@ var dl = cc.Layer.extend({
     jumpDuration: 0.3, 
     gameState: "init",
     dinoState: "run",
+    press: false, 
     init:function () 
     {
         //////////////////////////////
         // 1. super init first
+        var size = cc.director.getWinSize();
         this._super();
+        // cc.log("onKeyPressed"); 
+        this.gameState = "mainMenu";
+        cc.log(this.gameState);
+        var givenNumbers = 999999; 
+        var scaleLength = 1; 
+        var scaleWidth = 1; 
+        var posX = 800; 
+        var posY = 350;
+        if ('keyboard' in cc.sys.capabilities)
+            {
+                var keyboardListener =
+                {
+                    event: cc.EventListener.KEYBOARD,
+                    onKeyPressed: function(key, event)
+                    {
+                        var ld_inst = event.getCurrentTarget();
+                        if (ld_inst.press == false)
+                        {
+                            ld_inst.changeStateToRunning();
+                            ld_inst.ld_inst == true;
+                        }
+                    }
+                };
+                cc.eventManager.addListener(keyboardListener, this);
+            }
+        cc.spriteFrameCache.addSpriteFrames(numberPos, number);
+        this.allDigits = new Array(6); 
+        for (var i = 0; i < 6; i++)
+        {
+            this.allDigits[i] = new cc.Sprite("#number_0.png");
+            this.allDigits[i].setPosition(posX,posY); 
+            this.allDigits[i].setScale(scaleLength,scaleWidth); 
+            this.addChild(this.allDigits[i],10);
+            posX += 30;
+        }
+        // this.removeChild(this.sprite);
+        cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
+        this.sprite = new cc.Sprite("#track.png");
+        this.spriteCloud = new cc.Sprite("#cloud.png");
+        cc.spriteFrameCache.addSpriteFrames(dinoPos, dino);
+        this.spriteDino = new cc.Sprite("#dino_duck_1.png");
         //cc.log("MyLayer - init");
         if ('keyboard' in cc.sys.capabilities) {
             var keyboardListener = {
@@ -33,6 +76,77 @@ var dl = cc.Layer.extend({
         } 
         // get screen size
         //var size = cc.director.getWinSize();
+        foo();
+        this.Label(size);
+        this.backGroundAtStart();
+        this.gameStart();
+        this.theNumber(givenNumbers,posX,posY,scaleLength,scaleWidth);
+        // get screen size
+        // add "Helloworld" splash screen"
+        
+    },
+    theNumber: function(givenNumbers,posX,posY,scaleLength,scaleWidth)
+    {
+        for (var i = 0; i < 6; i++)
+        {
+            var tmp = givenNumbers % 10;  
+            var frameName = "number_" +  tmp + ".png";
+            this.allDigits[i].setSpriteFrame(frameName);
+            givenNumbers = parseInt(givenNumbers / 10);
+        }   
+    },
+    gameStart: function()
+    {
+        this.sprite.setVisible(false); 
+        this.spriteCloud.setVisible(false); 
+        this.spriteDino.setVisible(false);
+        // this.allDigits.setVisible(false);
+        for(var i = 0; i < this.allDigits.length; i++)
+        {
+            this.allDigits[i].setVisible(false);
+        }
+    },
+    changingNumber: function()
+    {
+
+    },
+    changeStateToRunning: function()
+    {
+        this.helloLabel.setVisible(false);
+        this.gameState = "running";
+        this.spriteDino.setVisible(true); 
+        this.spriteCloud.setVisible(true);
+        this.sprite.setVisible(true);
+        cc.log("changeStateToRunning");
+        for(var i = 0; i < this.allDigits.length; i++)
+        {
+            this.allDigits[i].setVisible(true);
+        }
+    },
+
+    Label:function(size)
+    {
+        /////////////////////////////
+        // 2. add your codes below...
+        // add a label shows "Hello World"
+        // create and initialize a label
+        this.helloLabel = new cc.LabelTTF("Press any key to start", "Impact", 38);
+        // position the label on the center of the screen
+        this.helloLabel.setPosition(size.width / 2, size.height - 40);
+        // add the label as a child to this layer
+        this.addChild(this.helloLabel, 5);
+        // this.gameStart();
+    },
+    backGroundAtStart: function() 
+    {
+        this.spriteCloud.setPosition(100, 300);
+        this.sprite.setAnchorPoint(0.5, 0.5);
+        this.sprite.setPosition(100,100);
+        this.sprite.setScale(2.5, 2.5);
+        this.sprite.setVisible(false);
+        this.spriteCloud.setVisible(false);
+        this.addChild(this.spriteCloud, 1);
+        this.addChild(this.sprite, 0);
 
         this.gameOn();
     },
@@ -189,7 +303,7 @@ var dl = cc.Layer.extend({
     onEnter: function()
     {
         this._super();
-        cc.log("MyLayer - onEnter()");
+        // cc.log("MyLayer - onEnter()");
         this.scheduleUpdate();
     },
 
