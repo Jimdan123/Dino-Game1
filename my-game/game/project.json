@@ -11,7 +11,6 @@
 
     "jsList" : [
         "src/resource.js",
-        "src/OtherScene/myApp.js",
         "src/OtherScene/sqrt.js",
         "src/OtherScene/my_module.js",
         "src/OtherScene/NewApp.js",
