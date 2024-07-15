@@ -3,11 +3,13 @@ var dl = cc.Layer.extend({
     helloLabel:null,
     sprite:null,
     spriteDino:null,
+    spriteDinoJump:null,
     jumpHeight: 200,
     jumpDuration: 0.3, 
     gameState: "init",
     dinoState: "run",
-    press: false, 
+    press: false,
+    score: 0,
     init:function () 
     {
         //////////////////////////////
@@ -17,11 +19,10 @@ var dl = cc.Layer.extend({
         // cc.log("onKeyPressed"); 
         this.gameState = "mainMenu";
         cc.log(this.gameState);
-
-        var givenNumbers = 999999; 
+        var givenNumbers = 0; 
         var scaleLength = 1; 
         var scaleWidth = 1; 
-        var posX = 800; 
+        var posX = 600; 
         var posY = 350;
         if ('keyboard' in cc.sys.capabilities)
             {
@@ -94,20 +95,23 @@ var dl = cc.Layer.extend({
         this.Label(size);
         this.backGroundAtStart();
         this.gameStart();
-        this.theNumber(givenNumbers,posX,posY,scaleLength,scaleWidth);
+        cc.log(this.gameState);
+        this.theNumber(givenNumbers);
+
         // get screen size
         // add "Helloworld" splash screen"
         
     },
-    theNumber: function(givenNumbers,posX,posY,scaleLength,scaleWidth)
+    theNumber: function(givenNumbers)
     {
-        for (var i = 0; i < 6; i++)
+        // while (true){cc.log(this.gameState);}
+        for (var i = 5; i > -1; i--)
         {
             var tmp = givenNumbers % 10;  
             var frameName = "number_" +  tmp + ".png";
             this.allDigits[i].setSpriteFrame(frameName);
             givenNumbers = parseInt(givenNumbers / 10);
-        }   
+        }
     },
     gameStart: function()
     {
@@ -131,10 +135,6 @@ var dl = cc.Layer.extend({
 
         // Run by default
         this.run();
-
-    },
-    changingNumber: function()
-    {
 
     },
     changeStateToRunning: function()
@@ -273,12 +273,12 @@ var dl = cc.Layer.extend({
     },
 
     jump: function() {
-        this.spriteDino.stopAllActions();
+        // this.spriteDino.stopAllActions();
         var jumpUp = cc.moveBy(this.jumpDuration, cc.p(0, this.jumpHeight));
         var jumpDown = cc.moveBy(this.jumpDuration, cc.p(0, -this.jumpHeight));
         var jumpMotion = cc.sequence(jumpUp, jumpDown, cc.callFunc(this.endJump, this));
-        this.spriteDino.runAction(cc.animate(this.animJump));
         this.spriteDino.runAction(jumpMotion);
+        this.spriteDino.runAction(cc.animate(this.animJump));  
     },
 
     cancelJump: function() 
@@ -297,8 +297,9 @@ var dl = cc.Layer.extend({
     },
 
     endJump: function() {
-            this.dinoState = "run";
-            this.run();
+        // cc.log(this.spriteDino.getPosition());
+        this.dinoState = "run";
+        this.run();
     },
 
     duck: function() 
@@ -337,6 +338,13 @@ var dl = cc.Layer.extend({
     {
        this.moveTrack(8);
 
+        // this.givenNumbers = this.changingNumber(this.givenNumbers);
+        if(this.gameState == "running")
+        {
+            this.theNumber(this.score += 1); 
+        }
+        // cc.log(this.givenNumbers);
+        // this.theNumber(this.givenNumbers);
     },
 
 });
@@ -352,7 +360,7 @@ var dinoScene = cc.Scene.extend({
         layer.init();
         // 4. add to scene
         this.addChild(layer);
-
+        // layer.gameState = "running"
         //cc.log("MyLayer - onEnter()");
         this.scheduleUpdate();
         //cc.log("Node Parent: " + dino.parent);
