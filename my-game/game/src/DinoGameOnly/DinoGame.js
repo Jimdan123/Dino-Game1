@@ -4,8 +4,8 @@ var dl = cc.Layer.extend({
     sprite:null,
     spriteDino:null,
     spriteDinoJump:null,
-    jumpHeight: 200,
-    jumpDuration: 0.3, 
+    jumpHeight: 260,
+    jumpDuration: 0.5, 
     gameState: "init",
     dinoState: "run",
     press: false,
@@ -132,6 +132,7 @@ var dl = cc.Layer.extend({
         
         // Setup animation
         this.setupDino();
+        this.schedule(this.spawnCactus, 2);
 
         // Run by default
         this.run();
@@ -273,13 +274,18 @@ var dl = cc.Layer.extend({
     },
 
     jump: function() {
-        // this.spriteDino.stopAllActions();
-        var jumpUp = cc.moveBy(this.jumpDuration, cc.p(0, this.jumpHeight));
-        var jumpDown = cc.moveBy(this.jumpDuration, cc.p(0, -this.jumpHeight));
+        this.spriteDino.stopAllActions();
+    
+        var jumpUp = cc.moveBy(this.jumpDuration * 0.5, cc.p(0, this.jumpHeight)).easing(cc.easeOut(2.0));
+
+        var jumpDown = cc.moveBy(this.jumpDuration * 1.5, cc.p(0, -this.jumpHeight)).easing(cc.easeIn(2.0));
+
         var jumpMotion = cc.sequence(jumpUp, jumpDown, cc.callFunc(this.endJump, this));
+    
         this.spriteDino.runAction(jumpMotion);
-        this.spriteDino.runAction(cc.animate(this.animJump));  
+        this.spriteDino.runAction(cc.animate(this.animJump));
     },
+    
 
     cancelJump: function() 
     {
@@ -332,6 +338,29 @@ var dl = cc.Layer.extend({
         if (this.spriteTrack2.x < -this.spriteTrack2.getContentSize().width / 2) {
             this.spriteTrack2.x = this.spriteTrack1.x + this.spriteTrack1.getContentSize().width;
         }
+    },
+
+    spawnCactus: function() {
+        var cactusType = Math.floor(Math.random() * 6) + 1; // Random cactus type between 1 and 6
+        var cactusSpriteFrameName = "cactus_" + cactusType + ".png";
+        var cactusSprite = new cc.Sprite(cc.spriteFrameCache.getSpriteFrame(cactusSpriteFrameName));
+        
+        cactusSprite.setAnchorPoint(0.5, 0);
+        cactusSprite.setPosition(cc.director.getWinSize().width + cactusSprite.getContentSize().width, 160); 
+        
+        this.addChild(cactusSprite);
+    
+        var moveAction = cc.moveTo(4, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
+        var cleanupAction = cc.callFunc(function() {
+            cactusSprite.removeFromParent();
+        }, this);
+    
+        cactusSprite.runAction(cc.sequence(moveAction, cleanupAction));
+    },
+    
+
+    spawnBird: function() {
+
     },
 
     update: function(dt)
