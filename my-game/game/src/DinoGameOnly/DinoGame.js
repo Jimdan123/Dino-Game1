@@ -20,9 +20,9 @@ var dl = cc.Layer.extend({
         this.gameState = "mainMenu";
         cc.log(this.gameState);
         var givenNumbers = 0; 
-        var scaleLength = 1; 
-        var scaleWidth = 1; 
-        var posX = 600; 
+        var scaleLength = 0.5; 
+        var scaleWidth = 0.5    ; 
+        var posX = 700; 
         var posY = 350;
         if ('keyboard' in cc.sys.capabilities)
             {
@@ -49,8 +49,17 @@ var dl = cc.Layer.extend({
             this.allDigits[i].setPosition(posX,posY); 
             this.allDigits[i].setScale(scaleLength,scaleWidth); 
             this.addChild(this.allDigits[i],10);
-            posX += 30;
+            posX += 15;
         }
+        // this.highScore = new Array(6);
+        // for (var i = 0; i < 6; i++)
+        // {
+        //     this.highScore[i] = new cc.Sprite("#number_0.png");
+        //     this.highScore[i].setPosition(700,200); 
+        //     this.highScore[i].setScale(scaleLength,scaleWidth); 
+        //     this.addChild(this.highScore[i],10);
+        //     posX += 20;
+        // }
         // this.removeChild(this.sprite);
         cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
         this.spriteTrack1 = new cc.Sprite("#track.png");
@@ -129,7 +138,7 @@ var dl = cc.Layer.extend({
         this.spriteDino.setPosition(200, 200);
         this.spriteDino.setAnchorPoint(0.5,0.5); 
         this.addChild(this.spriteDino, 0);
-        
+        this.spriteDino.setVisible(false);
         // Setup animation
         this.setupDino();
 
