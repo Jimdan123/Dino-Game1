@@ -17,6 +17,7 @@ var dl = cc.Layer.extend({
         // cc.log("onKeyPressed"); 
         this.gameState = "mainMenu";
         cc.log(this.gameState);
+
         var givenNumbers = 999999; 
         var scaleLength = 1; 
         var scaleWidth = 1; 
@@ -51,10 +52,23 @@ var dl = cc.Layer.extend({
         }
         // this.removeChild(this.sprite);
         cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
-        this.sprite = new cc.Sprite("#track.png");
+        this.spriteTrack1 = new cc.Sprite("#track.png");
+        this.spriteTrack1.setAnchorPoint(0.5, 0.5);
+        this.spriteTrack1.setPosition(size.width / 2, 165);
+        this.addChild(this.spriteTrack1, 0);
+
+        this.spriteTrack2 = new cc.Sprite("#track.png");
+        this.spriteTrack2.setAnchorPoint(0.5, 0.5);
+        this.spriteTrack2.setPosition((size.width / 2) + this.spriteTrack1.getContentSize().width, 165);
+        this.addChild(this.spriteTrack2, 0);
+
         this.spriteCloud = new cc.Sprite("#cloud.png");
         cc.spriteFrameCache.addSpriteFrames(dinoPos, dino);
         this.spriteDino = new cc.Sprite("#dino_duck_1.png");
+        cc.spriteFrameCache.addSpriteFrames(birdPos, bird);
+        this.spriteBird = new cc.Sprite("#bird_1.png");
+        cc.spriteFrameCache.addSpriteFrames(cactusPos, cactus);
+        this.spriteCactus = new cc.Sprite("#cactus_1.png");
         //cc.log("MyLayer - init");
         if ('keyboard' in cc.sys.capabilities) {
             var keyboardListener = {
@@ -97,7 +111,8 @@ var dl = cc.Layer.extend({
     },
     gameStart: function()
     {
-        this.sprite.setVisible(false); 
+        this.spriteTrack1.setVisible(false); 
+        this.spriteTrack2.setVisible(false);
         this.spriteCloud.setVisible(false); 
         this.spriteDino.setVisible(false);
         // this.allDigits.setVisible(false);
@@ -105,6 +120,18 @@ var dl = cc.Layer.extend({
         {
             this.allDigits[i].setVisible(false);
         }
+        cc.spriteFrameCache.addSpriteFrames(dinoPos, dino);
+        this.spriteDino = new cc.Sprite("#dino_jump.png"); 
+        this.spriteDino.setPosition(200, 200);
+        this.spriteDino.setAnchorPoint(0.5,0.5); 
+        this.addChild(this.spriteDino, 0);
+        
+        // Setup animation
+        this.setupDino();
+
+        // Run by default
+        this.run();
+
     },
     changingNumber: function()
     {
@@ -116,7 +143,10 @@ var dl = cc.Layer.extend({
         this.gameState = "running";
         this.spriteDino.setVisible(true); 
         this.spriteCloud.setVisible(true);
-        this.sprite.setVisible(true);
+        this.spriteTrack1.setVisible(true);
+        this.spriteTrack2.setVisible(true);
+        //this.spriteTrack1.setPosition(cc.director.getWinSize().width / 2, 165);
+        //this.spriteTrack2.setPosition(cc.director.getWinSize().width + this.spriteTrack1.getContentSize().width / 2, 165);
         cc.log("changeStateToRunning");
         for(var i = 0; i < this.allDigits.length; i++)
         {
@@ -140,32 +170,15 @@ var dl = cc.Layer.extend({
     backGroundAtStart: function() 
     {
         this.spriteCloud.setPosition(100, 300);
-        this.sprite.setAnchorPoint(0.5, 0.5);
-        this.sprite.setPosition(100,100);
-        this.sprite.setScale(2.5, 2.5);
-        this.sprite.setVisible(false);
+        this.spriteTrack1.setVisible(false); 
+        this.spriteTrack2.setVisible(true);
         this.spriteCloud.setVisible(false);
         this.addChild(this.spriteCloud, 1);
-        this.addChild(this.sprite, 0);
-
-        this.gameOn();
-    },
-        
-    gameOn: function()
-    {
-        cc.spriteFrameCache.addSpriteFrames(dinoPos, dino);
-        this.spriteDino = new cc.Sprite("#dino_jump.png"); 
-        this.spriteDino.setPosition(200, 200);
-        this.spriteDino.setAnchorPoint(0.5,0.5); 
-        this.addChild(this.spriteDino, 0);
-        
-        // Setup animation
-        this.setupDino();
-
-        // Run by default
-        this.run();
+        this.addChild(this.spriteTrack1, 0);
+        this.addChild(this.spriteTrack2, 0);
 
     },
+        
 
     onKeyPressed: function(key)
     {
@@ -307,20 +320,23 @@ var dl = cc.Layer.extend({
         this.scheduleUpdate();
     },
 
+    moveTrack: function(speed) {
+        this.spriteTrack1.x -= speed;
+        this.spriteTrack2.x -= speed;
+    
+        if (this.spriteTrack1.x < -this.spriteTrack1.getContentSize().width / 2) {
+            this.spriteTrack1.x = this.spriteTrack2.x + this.spriteTrack2.getContentSize().width;
+        }
+    
+        if (this.spriteTrack2.x < -this.spriteTrack2.getContentSize().width / 2) {
+            this.spriteTrack2.x = this.spriteTrack1.x + this.spriteTrack1.getContentSize().width;
+        }
+    },
+
     update: function(dt)
     {
-        /*
-        if (this.dinoState === "runInit") {
-            this.run();
-            this.dinoState = "run"
-        }
-        else if (this.dinoState === "jump") {
-            this.jump();
-        }
-        else if (this.dinoState === "duck") {
-            this.duck();
-        }
-        */
+       this.moveTrack(8);
+
     },
 
 });
