@@ -51,7 +51,7 @@ var dl = cc.Layer.extend({
             this.addChild(this.allDigits[i],10);
             posX += 15;
         }
-        // this.highScore = new Array(6);
+// this.highScore = new Array(6);
         // for (var i = 0; i < 6; i++)
         // {
         //     this.highScore[i] = new cc.Sprite("#number_0.png");
@@ -141,7 +141,6 @@ var dl = cc.Layer.extend({
         this.spriteDino.setVisible(false);
         // Setup animation
         this.setupDino();
-        this.schedule(this.spawnCactus, 2);
 
         // Run by default
         this.run();
@@ -183,6 +182,7 @@ var dl = cc.Layer.extend({
         this.spriteTrack1.setVisible(false); 
         this.spriteTrack2.setVisible(true);
         this.spriteCloud.setVisible(false);
+
         this.addChild(this.spriteCloud, 1);
         this.addChild(this.spriteTrack1, 0);
         this.addChild(this.spriteTrack2, 0);
@@ -287,7 +287,7 @@ var dl = cc.Layer.extend({
     
         var jumpUp = cc.moveBy(this.jumpDuration * 0.5, cc.p(0, this.jumpHeight)).easing(cc.easeOut(2.0));
 
-        var jumpDown = cc.moveBy(this.jumpDuration * 1.5, cc.p(0, -this.jumpHeight)).easing(cc.easeIn(2.0));
+        var jumpDown = cc.moveBy(this.jumpDuration * 1, cc.p(0, -this.jumpHeight)).easing(cc.easeIn(2.0));
 
         var jumpMotion = cc.sequence(jumpUp, jumpDown, cc.callFunc(this.endJump, this));
     
@@ -301,7 +301,7 @@ var dl = cc.Layer.extend({
         this.spriteDino.stopAllActions();
 
         this.dinoState = "vol"; 
-
+       
         var lop = cc.moveTo(0.1, cc.p(200, 200));
 
         var a = cc.sequence(lop, cc.callFunc(this.duck, this));
@@ -359,7 +359,7 @@ var dl = cc.Layer.extend({
         
         this.addChild(cactusSprite);
     
-        var moveAction = cc.moveTo(4, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
+        var moveAction = cc.moveTo(3.35, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
         var cleanupAction = cc.callFunc(function() {
             cactusSprite.removeFromParent();
         }, this);
@@ -369,16 +369,37 @@ var dl = cc.Layer.extend({
     
 
     spawnBird: function() {
+        var size = cc.director.getWinSize();
+        var birdHeight = 195 + Math.random() * 180; 
+        this.spriteBird.setPosition(size.width + this.spriteBird.getContentSize().width, birdHeight);
+        this.addChild(this.spriteBird);
 
+        var birdFrames = [];
+        birdFrames.push(cc.spriteFrameCache.getSpriteFrame("bird_1.png"));
+        birdFrames.push(cc.spriteFrameCache.getSpriteFrame("bird_2.png"));
+        var birdAnimation = new cc.Animation(birdFrames, 0.2);
+        var birdAnimate = cc.animate(birdAnimation).repeatForever();
+
+        var birdSpeed = 400; 
+        var birdFlyAction = cc.moveTo(size.width / birdSpeed, cc.p(-this.spriteBird.getContentSize().width, birdHeight));
+        var removeBird = cc.callFunc(function() {
+            this.spriteBird.removeFromParent();
+        }, this);
+
+        this.spriteBird.runAction(birdAnimate);
+        this.spriteBird.runAction(cc.sequence(birdFlyAction, removeBird));
     },
 
     update: function(dt)
     {
-       this.moveTrack(8);
+        cc.log(dt);
 
         // this.givenNumbers = this.changingNumber(this.givenNumbers);
         if(this.gameState == "running")
         {
+            this.schedule(this.spawnCactus, 2.5);
+            this.schedule(this.spawnBird, 7);
+            this.moveTrack(10);
             this.theNumber(this.score += 1); 
         }
         // cc.log(this.givenNumbers);
