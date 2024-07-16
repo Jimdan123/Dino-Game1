@@ -4,6 +4,14 @@ var dl = cc.Layer.extend({
     sprite:null,
     spriteDino:null,
     spriteDinoJump:null,
+    spriteBird: null,
+    spriteCactus: null,
+    spriteCloud1: null,
+    spriteCloud2: null,
+    spriteCloud3: null,
+    cloudMinHeight: 280,
+    cloudMaxHeight: 380,
+    cloudSpeed: 50,
     jumpHeight: 260,
     jumpDuration: 0.5, 
     gameState: "init",
@@ -23,7 +31,7 @@ var dl = cc.Layer.extend({
         var scaleLength = 0.5; 
         var scaleWidth = 0.5    ; 
         var posX = 700; 
-        var posY = 350;
+        var posY = 450;
         if ('keyboard' in cc.sys.capabilities)
             {
                 var keyboardListener =
@@ -72,13 +80,16 @@ var dl = cc.Layer.extend({
         this.spriteTrack2.setPosition((size.width / 2) + this.spriteTrack1.getContentSize().width, 165);
         this.addChild(this.spriteTrack2, 0);
 
-        this.spriteCloud = new cc.Sprite("#cloud.png");
         cc.spriteFrameCache.addSpriteFrames(dinoPos, dino);
         this.spriteDino = new cc.Sprite("#dino_duck_1.png");
         cc.spriteFrameCache.addSpriteFrames(birdPos, bird);
         this.spriteBird = new cc.Sprite("#bird_1.png");
         cc.spriteFrameCache.addSpriteFrames(cactusPos, cactus);
         this.spriteCactus = new cc.Sprite("#cactus_1.png");
+
+        this.spriteCloud1 = this.createCloud(size.width / 3);
+        this.spriteCloud2 = this.createCloud(size.width / 3 * 2);
+        this.spriteCloud3 = this.createCloud(size.width);
         //cc.log("MyLayer - init");
         if ('keyboard' in cc.sys.capabilities) {
             var keyboardListener = {
@@ -126,7 +137,9 @@ var dl = cc.Layer.extend({
     {
         this.spriteTrack1.setVisible(false); 
         this.spriteTrack2.setVisible(false);
-        this.spriteCloud.setVisible(false); 
+        this.spriteCloud1.setVisible(false); 
+        this.spriteCloud2.setVisible(false);
+        this.spriteCloud3.setVisible(false);
         this.spriteDino.setVisible(false);
         // this.allDigits.setVisible(false);
         for(var i = 0; i < this.allDigits.length; i++)
@@ -151,7 +164,9 @@ var dl = cc.Layer.extend({
         this.helloLabel.setVisible(false);
         this.gameState = "running";
         this.spriteDino.setVisible(true); 
-        this.spriteCloud.setVisible(true);
+        this.spriteCloud1.setVisible(true);
+        this.spriteCloud2.setVisible(true);
+        this.spriteCloud3.setVisible(true);
         this.spriteTrack1.setVisible(true);
         this.spriteTrack2.setVisible(true);
         //this.spriteTrack1.setPosition(cc.director.getWinSize().width / 2, 165);
@@ -178,14 +193,11 @@ var dl = cc.Layer.extend({
     },
     backGroundAtStart: function() 
     {
-        this.spriteCloud.setPosition(100, 300);
         this.spriteTrack1.setVisible(false); 
-        this.spriteTrack2.setVisible(true);
-        this.spriteCloud.setVisible(false);
-
-        this.addChild(this.spriteCloud, 1);
-        this.addChild(this.spriteTrack1, 0);
-        this.addChild(this.spriteTrack2, 0);
+        this.spriteTrack2.setVisible(false);
+        this.spriteCloud1.setVisible(false);
+        this.spriteCloud2.setVisible(false);
+        this.spriteCloud3.setVisible(false);
 
     },
         
@@ -253,6 +265,7 @@ var dl = cc.Layer.extend({
             cc.log("Key down released");
         }
     },
+
 
     setupDino: function() {
         // Run animation
@@ -359,7 +372,7 @@ var dl = cc.Layer.extend({
         
         this.addChild(cactusSprite);
     
-        var moveAction = cc.moveTo(3.35, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
+        var moveAction = cc.moveTo(2.75, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
         var cleanupAction = cc.callFunc(function() {
             cactusSprite.removeFromParent();
         }, this);
@@ -380,7 +393,7 @@ var dl = cc.Layer.extend({
         var birdAnimation = new cc.Animation(birdFrames, 0.2);
         var birdAnimate = cc.animate(birdAnimation).repeatForever();
 
-        var birdSpeed = 400; 
+        var birdSpeed = 300; 
         var birdFlyAction = cc.moveTo(size.width / birdSpeed, cc.p(-this.spriteBird.getContentSize().width, birdHeight));
         var removeBird = cc.callFunc(function() {
             this.spriteBird.removeFromParent();
@@ -389,6 +402,51 @@ var dl = cc.Layer.extend({
         this.spriteBird.runAction(birdAnimate);
         this.spriteBird.runAction(cc.sequence(birdFlyAction, removeBird));
     },
+
+    createCloud: function(xPosition) {
+        var size = cc.director.getWinSize();
+        var cloudSprite = new cc.Sprite("#cloud.png");
+        var cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
+    
+        cloudSprite.setPosition(xPosition, cloudHeight);
+        this.addChild(cloudSprite);
+    
+        return cloudSprite;
+    },
+
+    moveCloud: function(cloudSprite, dt) {
+        var size = cc.director.getWinSize();
+    
+        cloudSprite.setPositionX(cloudSprite.getPositionX() - this.cloudSpeed * dt);
+    
+        if (cloudSprite.getPositionX() < -cloudSprite.getContentSize().width) {
+            var cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
+            cloudSprite.setPositionX(size.width + cloudSprite.getContentSize().width);
+            cloudSprite.setPositionY(cloudHeight);
+        }
+    },
+
+    updateClouds: function(dt) {
+    
+        this.moveCloud(this.spriteCloud1, dt);
+        this.moveCloud(this.spriteCloud2, dt);
+        this.moveCloud(this.spriteCloud3, dt);
+    },
+    
+    /* spawnCloud : function() {
+        var size = cc.director.getWinSize();
+        var cloudHeight = size.height / 2 + Math.random() * size.height / 4;
+        this.spriteCloud.setPosition(size.width + this.spriteCloud.getContentSize().width, cloudHeight); 
+        this.addChild(this.spriteCloud);
+
+        var cloudSpeed = 50; 
+        var cloudMove = cc.moveTo(size.width / cloudSpeed, cc.p(-this.spriteCloud.getContentSize().width, cloudHeight));
+        var removeCloud = cc.callFunc(function() {
+            this.spriteCloud.removeFromParent();
+        }, this);
+
+        this.spriteCloud.runAction(cc.sequence(cloudMove, removeCloud));
+    }, */ 
 
     update: function(dt)
     {
@@ -399,7 +457,8 @@ var dl = cc.Layer.extend({
         {
             this.schedule(this.spawnCactus, 2.5);
             this.schedule(this.spawnBird, 7);
-            this.moveTrack(10);
+            this.moveTrack(12);
+            this.updateClouds(dt);
             this.theNumber(this.score += 1); 
         }
         // cc.log(this.givenNumbers);
