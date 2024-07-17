@@ -314,7 +314,7 @@ var dl = cc.Layer.extend({
         this.spriteDino.stopAllActions();
 
         this.dinoState = "vol"; 
-       
+
         var lop = cc.moveTo(0.1, cc.p(200, 200));
 
         var a = cc.sequence(lop, cc.callFunc(this.duck, this));
