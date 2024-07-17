@@ -383,7 +383,8 @@ var dl = cc.Layer.extend({
 
     spawnBird: function() {
         var size = cc.director.getWinSize();
-        var birdHeight = 195 + Math.random() * 180; 
+        var max = Math.random()* 300 + 195
+        var birdHeight = 195 + Math.random() * (max - 195); 
         this.spriteBird.setPosition(size.width + this.spriteBird.getContentSize().width, birdHeight);
         this.addChild(this.spriteBird);
 
@@ -393,7 +394,7 @@ var dl = cc.Layer.extend({
         var birdAnimation = new cc.Animation(birdFrames, 0.2);
         var birdAnimate = cc.animate(birdAnimation).repeatForever();
 
-        var birdSpeed = 300; 
+        var birdSpeed = 400; 
         var birdFlyAction = cc.moveTo(size.width / birdSpeed, cc.p(-this.spriteBird.getContentSize().width, birdHeight));
         var removeBird = cc.callFunc(function() {
             this.spriteBird.removeFromParent();
