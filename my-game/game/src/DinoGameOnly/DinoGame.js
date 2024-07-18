@@ -28,7 +28,6 @@ var dl = cc.Layer.extend({
         this.downKeyPressed = false;
         this.gameState = "mainMenu";
         cc.log(this.gameState);
-
         this.cacti = [];
         this.birds = [];
         var givenNumbers = 0; 
@@ -79,6 +78,19 @@ var dl = cc.Layer.extend({
         this.spriteTrack1.setAnchorPoint(0.5, 0.5);
         this.spriteTrack1.setPosition(size.width / 2, 165);
         this.addChild(this.spriteTrack1, 0);
+
+        this.spriteGameOver = new cc.Sprite("#game_over.png");
+        this.spriteReset = new cc.Sprite("#reset.png");
+        this.spriteGameOver.setVisible(false);
+        // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
+        this.spriteGameOver.setPosition(400, 400);
+        this.addChild(this.spriteGameOver, 0);
+
+        this.spriteReset.setVisible(false);
+        // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
+        this.spriteReset.setPosition(400, 300);
+        this.addChild(this.spriteReset, 0);
+        
 
         this.spriteTrack2 = new cc.Sprite("#track.png");
         this.spriteTrack2.setAnchorPoint(0.5, 0.5);
@@ -466,11 +478,11 @@ var dl = cc.Layer.extend({
         this.gameState = "gameOver";
         this.cacti.forEach(cactus => cactus.stopAllActions());
         this.birds.forEach(bird => bird.stopAllActions());
+        this.spriteGameOver.setVisible(true);
+        this.spriteReset.setVisible(true);
         this.unscheduleAllCallbacks();
         this.spriteDino.stopAllActions();
-
         cc.log('Game Over!');
-
         // Restart Here KHANG
     },
 
