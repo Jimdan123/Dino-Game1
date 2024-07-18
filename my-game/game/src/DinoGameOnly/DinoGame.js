@@ -216,6 +216,7 @@ var dl = cc.Layer.extend({
             {
                 this.dinoState = "jump";
                 this.jump();
+                this.spriteDino.setSpriteFrame("dino_jump.png");
             }
 
             cc.log("Key space pressed");
