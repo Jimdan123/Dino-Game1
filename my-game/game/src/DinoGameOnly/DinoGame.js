@@ -394,7 +394,7 @@ var dl = cc.Layer.extend({
 
     spawnBird: function() {
         var size = cc.director.getWinSize();
-        var birdHeight = 195 + Math.random() * 180; 
+        var birdHeight = 195 + Math.random() * 180;
         this.spriteBird.setPosition(size.width + this.spriteBird.getContentSize().width, birdHeight);
         this.addChild(this.spriteBird);
         this.birds.push(this.spriteBird);
