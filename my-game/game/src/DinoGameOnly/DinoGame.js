@@ -18,15 +18,19 @@ var dl = cc.Layer.extend({
     dinoState: "run",
     press: false,
     score: 0,
+
     init:function () 
     {
         //////////////////////////////
         // 1. super init first
         var size = cc.director.getWinSize();
         this._super();
-        // cc.log("onKeyPressed"); 
+        this.downKeyPressed = false;
         this.gameState = "mainMenu";
         cc.log(this.gameState);
+
+        this.cacti = [];
+        this.birds = [];
         var givenNumbers = 0; 
         var scaleLength = 0.5; 
         var scaleWidth = 0.5    ; 
@@ -70,6 +74,7 @@ var dl = cc.Layer.extend({
         // }
         // this.removeChild(this.sprite);
         cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
+
         this.spriteTrack1 = new cc.Sprite("#track.png");
         this.spriteTrack1.setAnchorPoint(0.5, 0.5);
         this.spriteTrack1.setPosition(size.width / 2, 165);
@@ -207,7 +212,7 @@ var dl = cc.Layer.extend({
         // Jump
         if (key === cc.KEY.space) 
         {
-            if (this.dinoState == "run") 
+            if (this.dinoState === "run") 
             {
                 this.dinoState = "jump";
                 this.jump();
@@ -217,13 +222,14 @@ var dl = cc.Layer.extend({
         }
         else if (key === cc.KEY.down) 
         {
-            if (this.dinoState == "run")
+            this.downKeyPressed = true;
+            if (this.dinoState === "run")
             {
                 this.dinoState = "duck";
                 this.duck();
             }
 
-            else if (this.dinoState == "jump") {
+            else if (this.dinoState === "jump") {
                 this.cancelJump();
             }
             
@@ -255,9 +261,9 @@ var dl = cc.Layer.extend({
         }
         else if (key === cc.KEY.down) 
         {
-            if (this.dinoState == "duck")
+            this.downKeyPressed = false; 
+            if (this.dinoState != "jump")
             {
-                this.cancelJump();
                 this.dinoState = "run";
                 this.run();
             }
@@ -276,12 +282,9 @@ var dl = cc.Layer.extend({
             this.animRun.addSpriteFrame(frame); 
         }
         this.animRun.setDelayPerUnit(0.1);
-         
-        // Jump animation
+
         this.animJump = new cc.Animation(); 
         this.animJump.addSpriteFrame(cc.spriteFrameCache.getSpriteFrame("dino_jump.png"));
-        //this.animJump = cc.sequence(jumpUp, jumpDown);
-
         
         // Duck animation
         this.animDuck = new cc.Animation();
@@ -297,32 +300,37 @@ var dl = cc.Layer.extend({
 
     jump: function() {
         this.spriteDino.stopAllActions();
-    
+
+        var jumpAnimate = cc.animate(this.animJump);
+
         var jumpUp = cc.moveBy(this.jumpDuration * 0.5, cc.p(0, this.jumpHeight)).easing(cc.easeOut(2.0));
 
         var jumpDown = cc.moveBy(this.jumpDuration * 1, cc.p(0, -this.jumpHeight)).easing(cc.easeIn(2.0));
 
-        var jumpMotion = cc.sequence(jumpUp, jumpDown, cc.callFunc(this.endJump, this));
+        var jumpMotion = cc.sequence(jumpAnimate, jumpUp, jumpDown, cc.callFunc(this.endJump, this));
     
         this.spriteDino.runAction(jumpMotion);
         this.spriteDino.runAction(cc.animate(this.animJump));
     },
-    
 
-    cancelJump: function() 
-    {
+    cancelJump: function() {
         this.spriteDino.stopAllActions();
-
-        this.dinoState = "vol"; 
-       
-        var lop = cc.moveTo(0.1, cc.p(200, 200));
-
-        var a = cc.sequence(lop, cc.callFunc(this.duck, this));
-        this.spriteDino.runAction(a);
-        //var cancleMotion = cc.sequence(cc.moveTo(200, 200), cc.callFunc(this.duck), this);
-        //this.spriteDino.runAction(cancleMotion);
-       
+    
+        var jumpDown = cc.moveTo(0.15, cc.p(200, 200));
+        var AfterJump = cc.callFunc(function() {
+            if (!this.downKeyPressed) { 
+                this.dinoState = "run"; 
+                this.run();
+            } 
+            else {
+                this.dinoState = "duck";
+                this.duck(); 
+            }
+        }, this);
+    
+        this.spriteDino.runAction(cc.sequence(jumpDown, AfterJump));
     },
+    
 
     endJump: function() {
         // cc.log(this.spriteDino.getPosition());
@@ -369,12 +377,14 @@ var dl = cc.Layer.extend({
         
         cactusSprite.setAnchorPoint(0.5, 0);
         cactusSprite.setPosition(cc.director.getWinSize().width + cactusSprite.getContentSize().width, 160); 
-        
+
+        this.cacti.push(cactusSprite);
         this.addChild(cactusSprite);
     
         var moveAction = cc.moveTo(2.75, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
         var cleanupAction = cc.callFunc(function() {
             cactusSprite.removeFromParent();
+            this.cacti.splice(this.cacti.indexOf(cactusSprite), 1);
         }, this);
     
         cactusSprite.runAction(cc.sequence(moveAction, cleanupAction));
@@ -386,6 +396,7 @@ var dl = cc.Layer.extend({
         var birdHeight = 195 + Math.random() * 180; 
         this.spriteBird.setPosition(size.width + this.spriteBird.getContentSize().width, birdHeight);
         this.addChild(this.spriteBird);
+        this.birds.push(this.spriteBird);
 
         var birdFrames = [];
         birdFrames.push(cc.spriteFrameCache.getSpriteFrame("bird_1.png"));
@@ -397,6 +408,7 @@ var dl = cc.Layer.extend({
         var birdFlyAction = cc.moveTo(size.width / birdSpeed, cc.p(-this.spriteBird.getContentSize().width, birdHeight));
         var removeBird = cc.callFunc(function() {
             this.spriteBird.removeFromParent();
+            this.birds.splice(this.birds.indexOf(this.spriteBird), 1);
         }, this);
 
         this.spriteBird.runAction(birdAnimate);
@@ -432,34 +444,51 @@ var dl = cc.Layer.extend({
         this.moveCloud(this.spriteCloud2, dt);
         this.moveCloud(this.spriteCloud3, dt);
     },
-    
-    /* spawnCloud : function() {
-        var size = cc.director.getWinSize();
-        var cloudHeight = size.height / 2 + Math.random() * size.height / 4;
-        this.spriteCloud.setPosition(size.width + this.spriteCloud.getContentSize().width, cloudHeight); 
-        this.addChild(this.spriteCloud);
 
-        var cloudSpeed = 50; 
-        var cloudMove = cc.moveTo(size.width / cloudSpeed, cc.p(-this.spriteCloud.getContentSize().width, cloudHeight));
-        var removeCloud = cc.callFunc(function() {
-            this.spriteCloud.removeFromParent();
-        }, this);
+    hitBox: function() {
+        var dinoBox = this.spriteDino.getBoundingBox();
 
-        this.spriteCloud.runAction(cc.sequence(cloudMove, removeCloud));
-    }, */ 
+        this.cacti.forEach((cactus) => {
+            if (cc.rectIntersectsRect(dinoBox, cactus.getBoundingBox())) {
+                this.gameOver();
+            }
+        });
+
+        this.birds.forEach((bird) => {
+            if (cc.rectIntersectsRect(dinoBox, bird.getBoundingBox())) {
+                this.gameOver();
+            }
+        });
+    },
+
+    gameOver: function() {
+        this.gameState = "gameOver";
+        this.cacti.forEach(cactus => cactus.stopAllActions());
+        this.birds.forEach(bird => bird.stopAllActions());
+        this.unscheduleAllCallbacks();
+        this.spriteDino.stopAllActions();
+
+        cc.log('Game Over!');
+
+        // Restart Here KHANG
+    },
+
 
     update: function(dt)
     {
-        cc.log(dt);
-
         // this.givenNumbers = this.changingNumber(this.givenNumbers);
         if(this.gameState == "running")
         {
+
             this.schedule(this.spawnCactus, 2.5);
             this.schedule(this.spawnBird, 7);
             this.moveTrack(12);
             this.updateClouds(dt);
+            this.hitBox();
             this.theNumber(this.score += 1); 
+        }
+        else if (this.gameState == "gameOver") {
+            this.stopAllActions();
         }
         // cc.log(this.givenNumbers);
         // this.theNumber(this.givenNumbers);
