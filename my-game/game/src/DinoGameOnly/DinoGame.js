@@ -108,8 +108,6 @@ var dl = cc.Layer.extend({
         this.spriteBird = new cc.Sprite("#bird_1.png");
         cc.spriteFrameCache.addSpriteFrames(cactusPos, cactus);
         this.spriteCactus = new cc.Sprite("#cactus_1.png");
-        this.schedule(this.spawnCactus, 2.5);
-        this.schedule(this.spawnBird, 7);
         
         this.spriteCloud1 = new cc.Sprite("#cloud.png"); 
         this.spriteCloud2 = new cc.Sprite("#cloud.png");
@@ -183,6 +181,8 @@ var dl = cc.Layer.extend({
         //     return;
         // }
         this.spriteTrack1.setVisible(false); 
+        this.unschedule(this.spawnBird);
+        this.unschedule(this.spawnCactus);
         this.spriteTrack2.setVisible(false);
         this.spriteCloud1.setVisible(false); 
         this.spriteCloud2.setVisible(false);
@@ -206,6 +206,7 @@ var dl = cc.Layer.extend({
         this.birds = [];
         // this.scheduleUpdate();
         this.spriteDino.setVisible(false);
+        this.dinoState = "";
         // Setup animation
         this.setupDino();
         this.run();
@@ -218,8 +219,10 @@ var dl = cc.Layer.extend({
     },
     changeStateToRunning: function()
     {
+        this.scheduleUpdate();
         this.helloLabel.setVisible(false);
         this.gameState = "running";
+        this.dinoState = "run";
         this.spriteDino.setVisible(true); 
         this.spriteCloud1.setVisible(true);
         this.spriteCloud2.setVisible(true);
@@ -263,7 +266,7 @@ var dl = cc.Layer.extend({
         // Jump
         if (this.gameState == "gameOver") 
         {
-            if(key == cc.KEY.a)
+            if(key == cc.KEY.b)
                 this.gameStart();
             return;
         }
@@ -279,7 +282,7 @@ var dl = cc.Layer.extend({
 
             cc.log("Key space pressed");
         }
-        else if (key === cc.KEY.down) 
+        else if (key === cc.KEY.s) 
         {
             this.downKeyPressed = true;
             if (this.dinoState === "run")
@@ -289,16 +292,17 @@ var dl = cc.Layer.extend({
             }
 
             else if (this.dinoState === "jump") {
+                print("co Jump");
                 this.cancelJump();
             }
             
             cc.log("Key down pressed");
         }
-        else 
-        { 
-            this.dinoState = "run";
-            cc.log(this.gameState);
-        }
+        // else 
+        // { 
+        //     this.dinoState = "run";
+        //     cc.log(this.gameState);
+        // }
     },
 
     onKeyReleased: function(key)
@@ -318,9 +322,11 @@ var dl = cc.Layer.extend({
             }
             
         }
-        else if (key === cc.KEY.down) 
+        else if (key === cc.KEY.s) 
         {
             this.downKeyPressed = false; 
+            if(this.gameState == "gameOver") return;
+            
             if (this.dinoState != "jump")
             {
                 this.dinoState = "run";
@@ -374,8 +380,10 @@ var dl = cc.Layer.extend({
 
     cancelJump: function() {
         this.spriteDino.stopAllActions();
-    
-        var jumpDown = cc.moveTo(0.15, cc.p(200, 200));
+        var timeToJump = Math.sqrt((2*(this.spriteDino.posY - 200))/4.8);
+        print(timeToJump);
+        //do cao hien tại suy ra thời gian chạm đất
+        var jumpDown = cc.moveTo(timeToJump, cc.p(200, 200));
         var AfterJump = cc.callFunc(function() {
             if (!this.downKeyPressed) { 
                 this.dinoState = "run"; 
@@ -531,6 +539,8 @@ var dl = cc.Layer.extend({
     {
         this.gameState = "gameOver";
        
+        // this.pauseTarget(this.spawnCactus); 
+        this.unscheduleUpdate();
         this.cacti.forEach(cactus => cactus.pause());
         this.birds.forEach(bird => bird.pause());
         this.spriteDino.pause();
@@ -551,7 +561,8 @@ var dl = cc.Layer.extend({
         if(this.gameState == "running")
         {
             cc.log("this.gameState == running");
-
+            this.schedule(this.spawnCactus, 2.5);
+            this.schedule(this.spawnBird, 7);
             this.moveTrack(12);
             this.updateClouds(dt);
             this.hitBox();
