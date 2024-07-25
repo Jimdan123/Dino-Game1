@@ -81,6 +81,7 @@ var dl = cc.Layer.extend({
         this.addChild(this.spriteTrack1, 0);
 
         this.spriteGameOver = new cc.Sprite("#game_over.png");
+        // var uiButton = new ccui.Button();
         this.spriteReset = new cc.Sprite("#reset.png");
         this.spriteGameOver.setVisible(false);
         // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
@@ -91,7 +92,7 @@ var dl = cc.Layer.extend({
         // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
         this.spriteReset.setPosition(400, 300);
         this.addChild(this.spriteReset, 0);
-         
+
         this.spriteTrack2 = new cc.Sprite("#track.png");
         this.spriteTrack2.setAnchorPoint(0.5, 0.5);
         this.spriteTrack2.setPosition((this.size.width / 2) + this.spriteTrack1.getContentSize().width, 165);
@@ -123,6 +124,29 @@ var dl = cc.Layer.extend({
         this.addChild(this.spriteCloud2,0);
         this.addChild(this.spriteCloud3,0); 
         
+
+        // cc.eventManager.addListener(
+        //     {
+        //         event:cc.EventListener.MOUSE,
+        
+        //         onMouseMove: function (event)
+        //         {
+        //             var tmp = event.getCurrentTarget();
+        //             var n = Math.floor(event.getLocationX());
+        //             var m = Math.floor(event.getLocationY());
+        //             if (n >= 300 && n <= 500 && m >= 200 && m <= 400 && tmp.gameState == "gameOver"){
+        //             cc.log ("ikeh");    
+        //             tmp.spriteReset.setVisible(true);
+        //             }else{
+        //                 tmp.spriteReset.setVisible (false);
+        //             }
+        //         }
+        //         // onMouseClick: function(event)
+        //         // {
+
+        //         // }
+        //     }, this);
+
         //cc.log("MyLayer - init");
         if ('keyboard' in cc.sys.capabilities) {
             var keyboardListener = {
@@ -282,17 +306,17 @@ var dl = cc.Layer.extend({
 
             cc.log("Key space pressed");
         }
-        else if (key === cc.KEY.s) 
+        else if (key === cc.KEY.down) 
         {
             this.downKeyPressed = true;
+
             if (this.dinoState === "run")
             {
                 this.dinoState = "duck";
                 this.duck();
             }
-
             else if (this.dinoState === "jump") {
-                print("co Jump");
+                // print("co Jump");
                 this.cancelJump();
             }
             
@@ -310,9 +334,9 @@ var dl = cc.Layer.extend({
         if (key === cc.KEY.space) 
         {   
             if (this.dinoState == "jump") {
-                //this.spriteDino.moveTo(200, 200);
-                //this.dinoState = "run";
-                //this.run();
+                // this.spriteDino.moveTo(200, 200);
+                // this.dinoState = "run";
+                // this.run();
                 cc.log("Run after Jump");
             }
             cc.log("Key space released");
@@ -322,7 +346,7 @@ var dl = cc.Layer.extend({
             }
             
         }
-        else if (key === cc.KEY.s) 
+        else if (key === cc.KEY.down) 
         {
             this.downKeyPressed = false; 
             if(this.gameState == "gameOver") return;
@@ -380,10 +404,10 @@ var dl = cc.Layer.extend({
 
     cancelJump: function() {
         this.spriteDino.stopAllActions();
-        var timeToJump = Math.sqrt((2*(this.spriteDino.posY - 200))/4.8);
-        // print(timeToJump);
+        // var timeToJump = Math.sqrt((2*(this.spriteDino.posY - 200))/11.8);
+        // cc.log(this.spriteDino.posY);
         //do cao hien tại suy ra thời gian chạm đất
-        var jumpDown = cc.moveTo(timeToJump, cc.p(200, 200));
+        var jumpDown = cc.moveTo(0.15, cc.p(200, 200));
         var AfterJump = cc.callFunc(function() {
             if (!this.downKeyPressed) { 
                 this.dinoState = "run"; 
