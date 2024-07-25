@@ -437,9 +437,11 @@ var dl = cc.Layer.extend({
     },
 
     cancelJump: function() {
+        var timeToJump = Math.sqrt((2*(this.spriteDino.getPositionY() - 200)) / 18000);
+        cc.log(timeToJump);  
         this.spriteDino.stopAllActions();
         //do cao hien tại suy ra thời gian chạm đất
-        var jumpDown = cc.moveTo(0.15, cc.p(200, 200));
+        var jumpDown = cc.moveTo(timeToJump, cc.p(200, 200));
         var AfterJump = cc.callFunc(function() {
             if (!this.downKeyPressed) { 
                 this.dinoState = "run"; 
