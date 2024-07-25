@@ -407,8 +407,6 @@ var dl = cc.Layer.extend({
 
     cancelJump: function() {
         this.spriteDino.stopAllActions();
-        // var timeToJump = Math.sqrt((2*(this.spriteDino.posY - 200))/11.8);
-        // cc.log(this.spriteDino.posY);
         //do cao hien tại suy ra thời gian chạm đất
         var jumpDown = cc.moveTo(0.15, cc.p(200, 200));
         var AfterJump = cc.callFunc(function() {
@@ -478,7 +476,7 @@ var dl = cc.Layer.extend({
         this.cacti.push(cactusSprite);
         this.addChild(cactusSprite);
     
-        var moveAction = cc.moveTo(2.75, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
+        var moveAction = cc.moveTo(2.22, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
         var cleanupAction = cc.callFunc(function() {
             cactusSprite.removeFromParent();
             this.cacti.splice(this.cacti.indexOf(cactusSprite), 1);
@@ -503,7 +501,7 @@ var dl = cc.Layer.extend({
         var birdAnimation = new cc.Animation(birdFrames, 0.2);
         var birdAnimate = cc.animate(birdAnimation).repeatForever();
 
-        var birdSpeed = 400; 
+        var birdSpeed = 800; 
         var birdFlyAction = cc.moveTo(size.width / birdSpeed, cc.p(-this.spriteBird.getContentSize().width, birdHeight));
         var removeBird = cc.callFunc(function() {
             this.spriteBird.removeFromParent();
@@ -520,7 +518,7 @@ var dl = cc.Layer.extend({
     //     // var cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
     
     //     // cloudSprite.setPosition(xPosition, cloudHeight);
-    //     // this.addChild(cloudSprite);
+    //     // this.addChild(cloudSprite);   
     
     //     // return cloudSprite;
     // },
@@ -551,7 +549,6 @@ var dl = cc.Layer.extend({
         this.cacti.forEach((cactus) => {
             if (cc.rectIntersectsRect(dinoBox, cactus.getBoundingBox())) {
                 this.gameOver();
-                cc.log("cactus");
             }
         });
 
@@ -595,7 +592,7 @@ var dl = cc.Layer.extend({
             cc.log("this.gameState == running");
             this.schedule(this.spawnCactus, 2.5);
             this.schedule(this.spawnBird, 7);
-            this.moveTrack(15);
+            this.moveTrack(9.5);
             this.updateClouds(dt);
             this.hitBox();
             this.theNumber(this.score += 1); 
