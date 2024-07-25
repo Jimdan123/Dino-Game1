@@ -75,7 +75,7 @@ var dl = cc.Layer.extend({
         var scaleLength = 0.5; 
         var scaleWidth = 0.5    ; 
         var posX = this.sizeWidth - 100; 
-        var posY = this.sizeHeight / 1.5;
+        var posY = this.sizeHeight / 1.1;
         if ('keyboard' in cc.sys.capabilities)
             {
                 var keyboardListener =
