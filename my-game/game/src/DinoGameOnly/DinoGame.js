@@ -381,7 +381,7 @@ var dl = cc.Layer.extend({
     cancelJump: function() {
         this.spriteDino.stopAllActions();
         var timeToJump = Math.sqrt((2*(this.spriteDino.posY - 200))/4.8);
-        print(timeToJump);
+        // print(timeToJump);
         //do cao hien tại suy ra thời gian chạm đất
         var jumpDown = cc.moveTo(timeToJump, cc.p(200, 200));
         var AfterJump = cc.callFunc(function() {
