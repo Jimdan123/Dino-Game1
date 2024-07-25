@@ -7,7 +7,7 @@ cc.game.onStart = function() {
         document.body.removeChild(document.getElementById("cocosLoading"));
     }
         
-    var designSize = cc.size(800, 520);
+    var designSize = cc.size(1200, 520);
     //var screenSize = cc.view.getFrameSize();
 
     // set resource path

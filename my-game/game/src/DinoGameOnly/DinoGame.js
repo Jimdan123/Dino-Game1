@@ -19,7 +19,8 @@ var dl = cc.Layer.extend({
     dinoState: "run",
     press: false,
     score: 0,
-    size : cc.director.getWinSize(),
+    sizeWidth: cc.director.getWinSize().width,
+    sizeLength: cc.director.getWinSize().length,
     pause: [],
     init:function () 
     {
@@ -34,8 +35,8 @@ var dl = cc.Layer.extend({
         var givenNumbers = 0; 
         var scaleLength = 0.5; 
         var scaleWidth = 0.5    ; 
-        var posX = 700; 
-        var posY = 450;
+        var posX = 1100; 
+        var posY = 420;
         if ('keyboard' in cc.sys.capabilities)
             {
                 var keyboardListener =
@@ -77,7 +78,7 @@ var dl = cc.Layer.extend({
 
         this.spriteTrack1 = new cc.Sprite("#track.png");
         this.spriteTrack1.setAnchorPoint(0.5, 0.5);
-        this.spriteTrack1.setPosition(this.size.width / 2, 165);
+        this.spriteTrack1.setPosition(this.sizeWidth / 2, 165);
         this.addChild(this.spriteTrack1, 0);
 
         this.spriteGameOver = new cc.Sprite("#game_over.png");
@@ -85,7 +86,9 @@ var dl = cc.Layer.extend({
         this.spriteReset = new cc.Sprite("#reset.png");
         this.spriteGameOver.setVisible(false);
         // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
-        this.spriteGameOver.setPosition(400, 400);
+        cc.log(this.sizeWidth);
+        cc.log(this.sizeLength);
+        this.spriteGameOver.setPosition(this.sizeLength / 2, this.sizeWidth / 2);
         this.addChild(this.spriteGameOver, 0);
 
         this.spriteReset.setVisible(false);
@@ -95,7 +98,7 @@ var dl = cc.Layer.extend({
 
         this.spriteTrack2 = new cc.Sprite("#track.png");
         this.spriteTrack2.setAnchorPoint(0.5, 0.5);
-        this.spriteTrack2.setPosition((this.size.width / 2) + this.spriteTrack1.getContentSize().width, 165);
+        this.spriteTrack2.setPosition((this.sizeWidth / 2) + this.spriteTrack1.getContentSize().width, 165);
         this.addChild(this.spriteTrack2, 0);
         this.helloLabel = new cc.LabelTTF("Press any key to start", "Impact", 38);
 
@@ -114,11 +117,11 @@ var dl = cc.Layer.extend({
         this.spriteCloud2 = new cc.Sprite("#cloud.png");
         this.spriteCloud3 = new cc.Sprite("#cloud.png"); 
         var cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
-        this.spriteCloud1.setPosition(this.size.width / 3,cloudHeight);
+        this.spriteCloud1.setPosition(this.sizeWidth / 3,cloudHeight);
         cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
-        this.spriteCloud2.setPosition(this.size.width / 3 * 2, cloudHeight);
+        this.spriteCloud2.setPosition(this.sizeWidth / 3 * 2, cloudHeight);
         cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
-        this.spriteCloud3.setPosition(this.size.width,cloudHeight);
+        this.spriteCloud3.setPosition(this.sizeWidth,cloudHeight);
 
         this.addChild(this.spriteCloud1,0);
         this.addChild(this.spriteCloud2,0);
@@ -269,7 +272,7 @@ var dl = cc.Layer.extend({
         // add a label shows "Hello World"
         // create and initialize a label
         // position the label on the center of the screen
-        this.helloLabel.setPosition(this.size.width / 2, this.size.height - 40);
+        this.helloLabel.setPosition(this.sizeWidth / 2, this.sizeLength - 40);
         // add the label as a child to this layer
 
         // this.gameStart();
@@ -500,7 +503,7 @@ var dl = cc.Layer.extend({
         var birdAnimation = new cc.Animation(birdFrames, 0.2);
         var birdAnimate = cc.animate(birdAnimation).repeatForever();
 
-        var birdSpeed = 300; 
+        var birdSpeed = 400; 
         var birdFlyAction = cc.moveTo(size.width / birdSpeed, cc.p(-this.spriteBird.getContentSize().width, birdHeight));
         var removeBird = cc.callFunc(function() {
             this.spriteBird.removeFromParent();
@@ -577,9 +580,14 @@ var dl = cc.Layer.extend({
         this.spriteReset.setVisible(true);
     },
 
+    // g
+
     update: function(dt)
     {
         cc.log("update()");
+
+        // dy += v0*dt;
+        // v0 -= g*dt;
         
         // this.givenNumbers = this.changingNumber(this.givenNumbers);
         if(this.gameState == "running")
@@ -587,7 +595,7 @@ var dl = cc.Layer.extend({
             cc.log("this.gameState == running");
             this.schedule(this.spawnCactus, 2.5);
             this.schedule(this.spawnBird, 7);
-            this.moveTrack(12);
+            this.moveTrack(15);
             this.updateClouds(dt);
             this.hitBox();
             this.theNumber(this.score += 1); 
