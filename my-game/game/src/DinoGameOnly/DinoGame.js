@@ -1,5 +1,42 @@
 
 
+// Create a single touch event listener and write the callback code
+var listener1 = cc.EventListener.create({
+    event: cc.EventListener.TOUCH_ONE_BY_ONE,
+    // When "swallow touches" is true, then returning 'true' from the onTouchBegan method will "swallow" the touch event, preventing other listeners from using it.
+    swallowTouches: true,
+    //onTouchBegan event callback function
+    onTouchBegan: function (touch, event) { 
+        // event.getCurrentTarget() returns the *listener's* sceneGraphPriority node.   
+        var target = event.getCurrentTarget();  
+
+        //Get the position of the current point relative to the button
+        var locationInNode = target.convertToNodeSpace(touch.getLocation());    
+        var s = target.getContentSize();
+        var rect = cc.rect(0, 0, s.width, s.height);
+
+        //Check the click area
+        if (cc.rectContainsPoint(rect, locationInNode)) {       
+            cc.log("sprite began... x = " + locationInNode.x + ", y = " + locationInNode.y);
+            target.opacity = 180;
+            return true;
+        }
+        //cc.log("touch");
+        
+        return false;
+    },
+    //Trigger when moving touch
+  
+    //Process the touch end event
+    onTouchEnded: function (touch, event) {         
+        var target = event.getCurrentTarget();
+        cc.log("sprite onTouchesEnded.. ");
+        target.setOpacity(255);
+        target.getParent().gameStart();
+        //Reset zOrder and the display sequence will change
+    }
+});
+
 var dl = cc.Layer.extend({
     helloLabel:null,
     sprite:null,
@@ -19,11 +56,13 @@ var dl = cc.Layer.extend({
     dinoState: "run",
     press: false,
     score: 0,
-    sizeWidth: cc.director.getWinSize().width,
-    sizeLength: cc.director.getWinSize().length,
+    sizeWidth: null,
+    sizeHeight: null,
     pause: [],
     init:function () 
     {
+        this.sizeWidth =  cc.director.getWinSize().width; 
+        this.sizeHeight = cc.director.getWinSize().height;
         //////////////////////////////
         // 1. super init first
         this._super();
@@ -35,8 +74,8 @@ var dl = cc.Layer.extend({
         var givenNumbers = 0; 
         var scaleLength = 0.5; 
         var scaleWidth = 0.5    ; 
-        var posX = 1100; 
-        var posY = 420;
+        var posX = this.sizeWidth - 100; 
+        var posY = this.sizeHeight / 1.5;
         if ('keyboard' in cc.sys.capabilities)
             {
                 var keyboardListener =
@@ -80,20 +119,23 @@ var dl = cc.Layer.extend({
         this.spriteTrack1.setAnchorPoint(0.5, 0.5);
         this.spriteTrack1.setPosition(this.sizeWidth / 2, 165);
         this.addChild(this.spriteTrack1, 0);
-
+        // var winsize = cc.director.getWinSize().width;
+        // cc.log(winsize);
         this.spriteGameOver = new cc.Sprite("#game_over.png");
         // var uiButton = new ccui.Button();
         this.spriteReset = new cc.Sprite("#reset.png");
         this.spriteGameOver.setVisible(false);
         // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
-        cc.log(this.sizeWidth);
-        cc.log(this.sizeLength);
-        this.spriteGameOver.setPosition(this.sizeLength / 2, this.sizeWidth / 2);
+        // cc.log(this.sizeWidth);
+        // cc.log(this.sizeHeight);
+        this.spriteGameOver.setPosition(this.sizeWidth /2, this.sizeHeight / 2);
         this.addChild(this.spriteGameOver, 0);
 
         this.spriteReset.setVisible(false);
+        //this.spriteReset.myParentLayer = this;
+        cc.eventManager.addListener(listener1, this.spriteReset);
         // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
-        this.spriteReset.setPosition(400, 300);
+        this.spriteReset.setPosition(this.sizeWidth / 2, this.sizeHeight / 3);
         this.addChild(this.spriteReset, 0);
 
         this.spriteTrack2 = new cc.Sprite("#track.png");
@@ -272,7 +314,7 @@ var dl = cc.Layer.extend({
         // add a label shows "Hello World"
         // create and initialize a label
         // position the label on the center of the screen
-        this.helloLabel.setPosition(this.sizeWidth / 2, this.sizeLength - 40);
+        this.helloLabel.setPosition(this.sizeWidth / 2, this.sizeHeight - 40);
         // add the label as a child to this layer
 
         // this.gameStart();
@@ -291,12 +333,7 @@ var dl = cc.Layer.extend({
     onKeyPressed: function(key)
     {
         // Jump
-        if (this.gameState == "gameOver") 
-        {
-            if(key == cc.KEY.b)
-                this.gameStart();
-            return;
-        }
+        if (this.gameState == "gameOver") return;
 
         if (key === cc.KEY.space) 
         {
