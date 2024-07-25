@@ -72,9 +72,9 @@ var dl = cc.Layer.extend({
         this.cacti = [];
         this.birds = [];
         var givenNumbers = 0; 
-        var scaleLength = 0.5; 
-        var scaleWidth = 0.5    ; 
-        var posX = this.sizeWidth - 100; 
+        var scaleLength = 0.7; 
+        var scaleWidth = 0.7; 
+        var posX = this.sizeWidth - 110; 
         var posY = this.sizeHeight / 1.1;
         if ('keyboard' in cc.sys.capabilities)
             {
@@ -101,7 +101,7 @@ var dl = cc.Layer.extend({
             this.allDigits[i].setPosition(posX,posY); 
             this.allDigits[i].setScale(scaleLength,scaleWidth); 
             this.addChild(this.allDigits[i],10);
-            posX += 15;
+            posX += 20;
         }
 // this.highScore = new Array(6);
         // for (var i = 0; i < 6; i++)
@@ -128,14 +128,14 @@ var dl = cc.Layer.extend({
         // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
         // cc.log(this.sizeWidth);
         // cc.log(this.sizeHeight);
-        this.spriteGameOver.setPosition(this.sizeWidth /2, this.sizeHeight / 2);
+        this.spriteGameOver.setPosition(this.sizeWidth /2, this.sizeHeight / 1.5);
         this.addChild(this.spriteGameOver, 0);
 
         this.spriteReset.setVisible(false);
         //this.spriteReset.myParentLayer = this;
         cc.eventManager.addListener(listener1, this.spriteReset);
         // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
-        this.spriteReset.setPosition(this.sizeWidth / 2, this.sizeHeight / 3);
+        this.spriteReset.setPosition(this.sizeWidth / 2, this.sizeHeight / 2);
         this.addChild(this.spriteReset, 0);
 
         this.spriteTrack2 = new cc.Sprite("#track.png");
@@ -143,6 +143,7 @@ var dl = cc.Layer.extend({
         this.spriteTrack2.setPosition((this.sizeWidth / 2) + this.spriteTrack1.getContentSize().width, 165);
         this.addChild(this.spriteTrack2, 0);
         this.helloLabel = new cc.LabelTTF("Press any key to start", "Impact", 38);
+        this.helloLabel.setPosition(this.sizeWidth / 2, this.sizeHeight - 40);
 
         cc.spriteFrameCache.addSpriteFrames(dinoPos, dino);
         this.spriteDino = new cc.Sprite("#dino_jump.png");
@@ -222,6 +223,10 @@ var dl = cc.Layer.extend({
         // get screen size
         // add "Helloworld" splash screen"
         
+    },
+    gameMenu: function()
+    {
+
     },
     theNumber: function(givenNumbers)
     {
@@ -307,18 +312,7 @@ var dl = cc.Layer.extend({
         }
     },
 
-    Label:function(size)
-    {
-        /////////////////////////////
-        // 2. add your codes below...
-        // add a label shows "Hello World"
-        // create and initialize a label
-        // position the label on the center of the screen
-        this.helloLabel.setPosition(this.sizeWidth / 2, this.sizeHeight - 40);
-        // add the label as a child to this layer
-
-        // this.gameStart();
-    },
+  
     backGroundAtStart: function() 
     {
         this.spriteTrack1.setVisible(false); 
