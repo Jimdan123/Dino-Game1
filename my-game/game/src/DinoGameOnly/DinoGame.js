@@ -37,7 +37,9 @@ var listener1 = cc.EventListener.create({
 });
 
 var dl = cc.Layer.extend({
+    startDuration: 0.8, 
     helloLabel:null,
+    tmpScore: null,
     sprite:null,
     spriteDino:null,
     spriteDinoJump:null,
@@ -61,9 +63,11 @@ var dl = cc.Layer.extend({
     lastScore: 0,
     sizeWidth: null,
     sizeHeight: null,
-    pause: [],
+    delay: true,
+    delayValue: 10000,
     init:function () 
     {
+        this.tmpScore = 0;
         this.sizeWidth =  cc.director.getWinSize().width; 
         this.sizeHeight = cc.director.getWinSize().height;
         //////////////////////////////
@@ -77,12 +81,15 @@ var dl = cc.Layer.extend({
         var givenNumbers = 0; 
         var scaleLength = 0.7; 
         var scaleWidth = 0.7; 
-        var posX = this.sizeWidth - 110; 
-        var posY = this.sizeHeight / 1.1;
+
+        var posX = this.sizeWidth - 150; 
+        var posY = this.sizeHeight / 1.2;
+
         var highScoreX = posX - 200; 
         var highScoreY = posY;
         var highScoreScaleLength = 0.7; 
         var highScoreScaleWidth = 0.7; 
+        /*
         if ('keyboard' in cc.sys.capabilities)
             {
                 var keyboardListener =
@@ -93,33 +100,35 @@ var dl = cc.Layer.extend({
                         var ld_inst = event.getCurrentTarget();
                         if (ld_inst.press == false)
                         {
-                            ld_inst.changeStateToRunning();
+                            ld_inst.gameStart();
                             ld_inst.press = true;
                         }
                     }
                 };
                 cc.eventManager.addListener(keyboardListener, this);
             }
+        */
         cc.spriteFrameCache.addSpriteFrames(numberPos, number);
         this.allDigits = new Array(6); 
         for (var i = 0; i < 6; i++)
         {
             this.allDigits[i] = new cc.Sprite("#number_0.png");
             this.allDigits[i].setPosition(posX,posY); 
+            this.allDigits[i].setVisible(false);
             this.allDigits[i].setScale(scaleLength,scaleWidth); 
-            this.addChild(this.allDigits[i],10);
+            this.addChild(this.allDigits[i],1);
             posX += 20;
         }
-        setInterval(() => {this.score += 1},100);
+
         this.highScore = new Array(6);  
         for (var i = 0; i < 6; i++)
         {
             this.highScore[i] = new cc.Sprite("#number_0.png");
             this.highScore[i].setPosition(highScoreX,highScoreY); 
             this.highScore[i].setScale(highScoreScaleLength,highScoreScaleWidth);
-            cc.log(this.highScore[i]);
+            this.highScore[i].setVisible(false);
             this.highScore[i].setScale(scaleLength,scaleWidth); 
-            this.addChild(this.highScore[i],20);
+            this.addChild(this.highScore[i],1);
             highScoreX += 20;
         }
         cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
@@ -128,40 +137,38 @@ var dl = cc.Layer.extend({
         this.spriteTrack1 = new cc.Sprite("#track.png");
         this.spriteTrack1.setAnchorPoint(0.5, 0.5);
         this.spriteTrack1.setPosition(this.sizeWidth / 2, 165);
-        this.addChild(this.spriteTrack1, 0);
-        // var winsize = cc.director.getWinSize().width;
-        // cc.log(winsize);
-        this.spriteGameOver = new cc.Sprite("#game_over.png");
-        // cc.log(this.spriteGameOver.getColor());
-        // var uiButton = new ccui.Button();
-        this.spriteReset = new cc.Sprite("#reset.png");
-        this.spriteGameOver.setVisible(false);
-        // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
-        // cc.log(this.sizeWidth);
-        // cc.log(this.sizeHeight);
-        this.spriteGameOver.setPosition(this.sizeWidth /2, this.sizeHeight / 1.5);
-        this.addChild(this.spriteGameOver, 20);
+        this.spriteTrack1.setVisible(false);
+        this.addChild(this.spriteTrack1, 1);
 
+        this.spriteGameOver = new cc.Sprite("#game_over.png");
+        this.spriteGameOver.setVisible(false);
+        this.spriteGameOver.setPosition(this.sizeWidth /2, this.sizeHeight / 1.5);
+        this.addChild(this.spriteGameOver, 3);
+
+        this.spriteReset = new cc.Sprite("#reset.png");
         this.spriteReset.setVisible(false);
-        //this.spriteReset.myParentLayer = this;
         cc.eventManager.addListener(listener1, this.spriteReset);
-        // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
         this.spriteReset.setPosition(this.sizeWidth / 2, this.sizeHeight / 2);
-        this.addChild(this.spriteReset, 20);
+        this.addChild(this.spriteReset, 3);
 
         this.spriteTrack2 = new cc.Sprite("#track.png");
         this.spriteTrack2.setAnchorPoint(0.5, 0.5);
+        this.spriteTrack2.setVisible(false);
         this.spriteTrack2.setPosition((this.sizeWidth / 2) + this.spriteTrack1.getContentSize().width, 165);
-        this.addChild(this.spriteTrack2, 0);
-        this.helloLabel = new cc.LabelTTF("Press any key to start", "Impact", 38);
-        this.helloLabel.setPosition(this.sizeWidth / 2, this.sizeHeight - 40);
+        this.addChild(this.spriteTrack2, 1);
+
+        this.helloLabel = new cc.LabelTTF("Press any key to start", "Outlined", 38);
+        this.helloLabel.setFontFillColor(cc.color(105,105,105));
+        this.helloLabel.setPosition(this.sizeWidth / 2, this.sizeHeight / 2);
+        this.addChild(this.helloLabel,3);
 
         cc.spriteFrameCache.addSpriteFrames(dinoPos, dino);
-        this.spriteDino = new cc.Sprite("#dino_jump.png");
-        this.spriteDino.setPosition(200, 200);
+        this.spriteDino = new cc.Sprite("#dino_start.png");
+        //this.spriteDino.setPosition(55, 200);
         this.spriteDino.setAnchorPoint(0.5,0.5); 
+        this.setupDinoAnim();
+        this.resetDino();
         this.addChild(this.spriteDino, 10);
-
 
         cc.spriteFrameCache.addSpriteFrames(birdPos, bird);
         this.spriteBird = new cc.Sprite("#bird_1.png");
@@ -172,6 +179,7 @@ var dl = cc.Layer.extend({
         var birdAnimate = cc.animate(birdAnimation).repeatForever();
         this.spriteBird.runAction(birdAnimate);
         this.addChild(this.spriteBird);
+        this.spriteBird.setVisible(false);
         this.birds.push(this.spriteBird);
 
         cc.spriteFrameCache.addSpriteFrames(cactusPos, cactus);
@@ -180,6 +188,7 @@ var dl = cc.Layer.extend({
         this.spriteCloud1 = new cc.Sprite("#cloud.png"); 
         this.spriteCloud2 = new cc.Sprite("#cloud.png");
         this.spriteCloud3 = new cc.Sprite("#cloud.png"); 
+    
         var cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
         this.spriteCloud1.setPosition(this.sizeWidth / 3,cloudHeight);
         cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
@@ -187,33 +196,20 @@ var dl = cc.Layer.extend({
         cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
         this.spriteCloud3.setPosition(this.sizeWidth,cloudHeight);
 
-        this.addChild(this.spriteCloud1, -1);
-        this.addChild(this.spriteCloud2, -1);
-        this.addChild(this.spriteCloud3, -1); 
-        
-        // cc.eventManager.addListener(
-        //     {
-        //         event:cc.EventListener.MOUSE,
-        
-        //         onMouseMove: function (event)
-        //         {
-        //             var tmp = event.getCurrentTarget();
-        //             var n = Math.floor(event.getLocationX());
-        //             var m = Math.floor(event.getLocationY());
-        //             if (n >= 300 && n <= 500 && m >= 200 && m <= 400 && tmp.gameState == "gameOver"){
-        //             cc.log ("ikeh");    
-        //             tmp.spriteReset.setVisible(true);
-        //             }else{
-        //                 tmp.spriteReset.setVisible (false);
-        //             }
-        //         }
-        //         // onMouseClick: function(event)
-        //         // {
+        this.spriteCloud1.setVisible(false); 
+        this.spriteCloud2.setVisible(false); 
+        this.spriteCloud3.setVisible(false);
 
-        //         // }
-        //     }, this);
+        this.addChild(this.spriteCloud1,1);
+        this.addChild(this.spriteCloud2,1);
+        this.addChild(this.spriteCloud3,1); 
+        
+        this.start = new cc.Sprite("White.jpg");
+        this.start.setAnchorPoint(0,0);
+        this.start.setPosition(0,0); 
+        this.start.setScale(10,1);   
+        this.addChild(this.start,2); 
 
-        //cc.log("MyLayer - init");
         if ('keyboard' in cc.sys.capabilities) {
             var keyboardListener = {
                 event: cc.EventListener.KEYBOARD, 
@@ -232,13 +228,8 @@ var dl = cc.Layer.extend({
             };
             cc.eventManager.addListener(keyboardListener, this);
         } 
-        // get screen size
-        //var size = cc.director.getWinSize();
-        foo();
-        // this.Label(size);
-        this.backGroundAtStart();
-        this.gameStart();
-        cc.log(this.gameState);
+
+        
         this.theNumber(givenNumbers);
         // get screen size
         // add "Helloworld" splash screen"
@@ -246,8 +237,19 @@ var dl = cc.Layer.extend({
         this.cactusCooldown = this.cactusSpawnInterval ;
         this.birdCooldown = this.birdSpawnInterval ;
         this.schedule(this.tick, 0.1);
+
+        this.setupMainMenuState();
         
     },
+
+    setupMainMenuState: function()
+    {
+        this.gameState = "mainMenu";
+        this.showMainMenuObj();
+
+        this.setScale(0.5, 0.5);
+    },
+
     gameTime: 0,
     //cactusCooldown: 0,
     lastCactusTime: 0,
@@ -267,10 +269,71 @@ var dl = cc.Layer.extend({
             }
         }
     },
-    gameMenu: function()
+
+    turningDelayTrue: function()
     {
+        this.delay = true;
+    },
+
+    warmingUp: function()
+    {
+        this.gameState = "warmUp";
+
+        cc.log("warmingUP");
+
+        this.spriteDino.stopAllActions();
+        var jumpMotion = this.buildJumpAction();
+        var seqAction = cc.sequence(jumpMotion, cc.callFunc(this.changingToWarmUp, this));
+        this.spriteDino.runAction(seqAction);
 
     },
+
+    changingToWarmUp: function()
+    {
+        cc.log("changingToWarmUp");
+        this.hideMainMenuObj();
+
+        //dino run
+        this.run();
+
+        //this.gameStart();
+        this.movingAtStart();
+
+        // cc.log(this.gameState);
+    },
+
+    movingAtStart: function() 
+    {
+        cc.log(this.startDuration);
+
+        var moving = cc.MoveTo.create(this.startDuration,cc.p(this.sizeWidth, 200));
+       
+        var movingMotion = cc.sequence(moving,cc.callFunc(this.endMoving, this));
+
+        cc.log("movingAtStart");
+
+        this.start.runAction(movingMotion);
+    },
+    
+    endMoving: function()
+    {
+        cc.log("endMoving 1");
+        this.removeChild(this.start);
+        cc.log("endMoving 2");
+        var scaling = cc.scaleTo(2, 1, 1);
+        cc.log("endMoving 3");
+        var scaleMotion = cc.sequence(scaling, cc.callFunc(this.endScaling, this));
+
+        cc.log("endMoving 4");
+
+        this.runAction(scaleMotion);
+    },
+
+    endScaling: function()
+    {
+        this.gameStart();
+    },
+
     theNumber: function(givenNumbers)
     {
         // while (true){cc.log(this.gameState);}
@@ -292,75 +355,61 @@ var dl = cc.Layer.extend({
             givenNumbers = parseInt(givenNumbers / 10);
         }
     },
-    // gameMenu:function() 
-    // {
-    //     this.Label();
-    //     // if(onKeyPressed)
-    //     // this.gameState = "running"; 
-    //     // this.gameStart();
 
-    // },
-    gameStart: function()
+    hideGameObjects: function()
     {
-        // if (this.gameState == "mainMenu")
-        // {
-        //     this.gameMenu();
-        //     return;
-        // }
         this.spriteTrack1.setVisible(false); 
-        this.unschedule(this.spawnBird);
-        this.unschedule(this.spawnCactus);
         this.spriteTrack2.setVisible(false);
         this.spriteCloud1.setVisible(false); 
         this.spriteCloud2.setVisible(false);
         this.spriteCloud3.setVisible(false);
-        this.spriteDino.setVisible(false);
-        this.score = 0;
-        this.spriteDino.setPosition(200,200);
+        //this.spriteDino.setVisible(false);
+      
+    },
+
+    cleanEntities: function()
+    {
         for(var i = 0; i < this.cacti.length; i++)
         {
             this.cacti[i].removeFromParent();
         }
+        this.cacti = [];
+        
+        for(var i = 0; i < this.birds.length; i++)
+        {
+            this.birds[i].setVisible(false); 
+        }
+    },
+
+    resetDino: function()
+    {
+         this.spriteDino.setPosition(55,200);
+
+         this.dinoState = "";
+    },
+
+    showGameObjects: function()
+    {
+        this.spriteTrack1.setVisible(true);
+        this.spriteTrack2.setVisible(true);
+
+        this.spriteCloud1.setVisible(true);
+        this.spriteCloud2.setVisible(true);
+        this.spriteCloud3.setVisible(true);
+       
+    },
+
+    hideScore: function()
+    {
         for(var i = 0; i < this.allDigits.length; i++)
         {
             this.allDigits[i].setVisible(false);   
             this.highScore[i].setVisible(false); 
         }
-        for(var i = 0; i < this.birds.length; i++)
-        {
-            this.birds[i].setVisible(false); 
-        }
-        this.cacti = [];
-        //this.birds = [];
-        // this.scheduleUpdate();
-        this.spriteDino.setVisible(false);
-        this.dinoState = "";
-        // Setup animation
-        this.setupDino();
-        this.run();
-        this.cacti.forEach(cactus => cactus.resume());
-        this.birds.forEach(bird => bird.resume());
-        // Run by default
-        // this.spriteDino.resume();
-        this.changeStateToRunning();
-
     },
-    changeStateToRunning: function()
+
+    showScore: function()
     {
-        this.scheduleUpdate();
-        this.helloLabel.setVisible(false);
-        this.gameState = "running";
-        this.dinoState = "run";
-        this.spriteDino.setVisible(true); 
-        this.spriteDino.setSpriteFrame("dino_run_1.png");
-        this.spriteCloud1.setVisible(true);
-        this.spriteCloud2.setVisible(true);
-        this.spriteCloud3.setVisible(true);
-        this.spriteTrack1.setVisible(true);
-        this.spriteTrack2.setVisible(true);
-        this.spriteGameOver.setVisible(false);
-        this.spriteReset.setVisible(false);
-        cc.log("changeStateToRunning");
         for(var i = 0; i < this.allDigits.length; i++)
         {
             this.allDigits[i].setVisible(true);
@@ -368,50 +417,108 @@ var dl = cc.Layer.extend({
         }
     },
 
-  
-    backGroundAtStart: function() 
+    showMainMenuObj: function()
     {
-        this.spriteTrack1.setVisible(false); 
-        this.spriteTrack2.setVisible(false);
-        this.spriteCloud1.setVisible(false);
-        this.spriteCloud2.setVisible(false);
-        this.spriteCloud3.setVisible(false);
+        this.helloLabel.setVisible(true);
+    },
 
+    hideMainMenuObj: function()
+    {
+        this.helloLabel.setVisible(false);
+    },
+
+    showResultMenuObj: function()
+    {
+        this.spriteGameOver.setVisible(true);
+        this.spriteReset.setVisible(true);
+    },
+
+    hideResultMenuObj: function()
+    {
+        this.spriteGameOver.setVisible(false);
+        this.spriteReset.setVisible(false);
+    },
+
+    //change game state To Running
+    gameStart: function()
+    {
+        this.gameState = "running";
+
+        this.hideMainMenuObj();
+
+        //cleanup old game
+        this.hideResultMenuObj();
+        this.cleanEntities();
+        this.resetDino();
+
+        this.score = 0;
+        this.showScore();
+        setInterval(() =>{this.score += 1},50);
+
+        this.showGameObjects();
+        this.cacti.forEach(cactus => cactus.resume());
+        this.birds.forEach(bird => bird.resume());
+
+         //run dino anim
+        this.dinoState = "run";
+        this.run();
+
+        //demo scale screen
+        /*
+        this.setScale(0.2,0.2);
+        var actionScale = cc.scaleTo(2,1,1);
+        this.runAction(actionScale);
+        */
     },
         
+    achievement: function()
+    {
+        // if(this.tmpScore + 100 == this.score) 
+        // {
+        //     for ()
+        // }
+    },
 
     onKeyPressed: function(key)
     {
         // Jump
         if (this.gameState == "gameOver") return;
 
-        if (key === cc.KEY.space) 
+        if (this.gameState == "mainMenu")
         {
-            if (this.dinoState === "run") 
-            {
-                this.dinoState = "jump";
-                this.jump();
-                this.spriteDino.setSpriteFrame("dino_jump.png");
-            }
-
-            cc.log("Key space pressed");
+            this.warmingUp();
         }
-        else if (key === cc.KEY.down) 
+        else if (this.gameState == "running")
         {
-            this.downKeyPressed = true;
-
-            if (this.dinoState === "run")
+            if (key === cc.KEY.space) 
             {
-                this.dinoState = "duck";
-                this.duck();
+                if (this.dinoState === "run") 
+                {
+                    this.dinoState = "jump";
+                    this.jump();
+                    this.spriteDino.setSpriteFrame("dino_jump.png");
+                }
+    
+                cc.log("Key space pressed");
             }
-            else if (this.dinoState === "jump") {
-                // print("co Jump");
-                this.cancelJump();
+            else if (key === cc.KEY.down) 
+            {
+                this.downKeyPressed = true;
+    
+                if (this.dinoState === "run")
+                {
+                    this.dinoState = "duck";
+                    this.duck();
+                }
+                else if (this.dinoState === "jump") {
+                    // print("co Jump");
+                    this.cancelJump();
+                }
+                
+                cc.log("Key down pressed");
             }
-            
-            cc.log("Key down pressed");
         }
+        
         // else 
         // { 
         //     this.dinoState = "run";
@@ -451,8 +558,7 @@ var dl = cc.Layer.extend({
         }
     },
 
-
-    setupDino: function() {
+    setupDinoAnim: function() {
         // Run animation
         this.animRun = new cc.Animation();
         for (var i = 1; i <= 2; i++) {
@@ -474,22 +580,34 @@ var dl = cc.Layer.extend({
         }
         this.animDuck.setDelayPerUnit(0.1);
         this.animDuck.setLoops(999999);
+
+        
+        //ani blinking eye to do list
         
     },
 
-    jump: function() {
-        this.spriteDino.stopAllActions();
-
+    buildJumpAction: function()
+    {
         var jumpAnimate = cc.animate(this.animJump);
 
         var jumpUp = cc.moveBy(this.jumpDuration * 0.5, cc.p(0, this.jumpHeight)).easing(cc.easeOut(2.0));
 
         var jumpDown = cc.moveBy(this.jumpDuration * 1, cc.p(0, -this.jumpHeight)).easing(cc.easeIn(2.0));
 
-        var jumpMotion = cc.sequence(jumpAnimate, jumpUp, jumpDown, cc.callFunc(this.endJump, this));
+        var jumpMotion = cc.sequence(jumpAnimate, jumpUp, jumpDown);
     
-        this.spriteDino.runAction(jumpMotion);
-        this.spriteDino.runAction(cc.animate(this.animJump));
+        return jumpMotion;
+    },
+
+    jump: function() {
+        this.spriteDino.stopAllActions();
+
+        var jumpMotion = this.buildJumpAction();
+
+        var seqAction = cc.sequence(jumpMotion, cc.callFunc(this.endJump, this));
+       
+        this.spriteDino.runAction(seqAction);
+        //this.spriteDino.runAction(cc.animate(this.animJump));
     },
 
     cancelJump: function() {
@@ -497,7 +615,7 @@ var dl = cc.Layer.extend({
         cc.log(timeToJump);  
         this.spriteDino.stopAllActions();
         //do cao hien tại suy ra thời gian chạm đất
-        var jumpDown = cc.moveTo(timeToJump, cc.p(200, 200));
+        var jumpDown = cc.moveTo(timeToJump, cc.p(55, 200));
         var AfterJump = cc.callFunc(function() {
             if (!this.downKeyPressed) { 
                 this.dinoState = "run"; 
@@ -566,48 +684,7 @@ var dl = cc.Layer.extend({
         this.cacti.push(cactusSprite);
         this.addChild(cactusSprite);
 
-        // var speed;
-       
-        //var speed = 9.5; 
-        // if (cactusSpriteFrameName == "cactus_1.png") {
-        //     speed = this.cactusSpeed * 2.265;
-        // }
-
-        // else if (cactusSpriteFrameName == "cactus_2.png") {
-
-        //     speed = this.cactusSpeed * 2.465;
-        // }
- 
-        // else if (cactusSpriteFrameName == "cactus_3.png") {
-        //     speed = this.cactusSpeed * 2.476;
-        // }
-
-        // else if (cactusSpriteFrameName == "cactus_4.png") {
-        //     speed = this.cactusSpeed * 2.265;
-        // }
-
-        // else if (cactusSpriteFrameName == "cactus_5.png") {
-        //     speed = this.cactusSpeed * 2.36;
-        // }
-        // else if (cactusSpriteFrameName == "cactus_6.png") { 
-        //     speed = this.cactusSpeed * 2.476;
-        // }
-
-        //this.cactusSpeed *= 0.83333333;
-
-        //var moveAction = cc.moveTo(speed, cc.p(-cactusSprite.getContentSize().width, 155)); // Move across the screen 
-        /*
-        cactusSprite.x -= speed; 
-        var cleanupAction = cc.callFunc(function() {
-            cactusSprite.removeFromParent();
-            this.cacti.splice(this.cacti.indexOf(cactusSprite), 1);
-        }, this);
-    
-        //cactusSprite.runAction(cc.sequence(moveAction, cleanupAction));
-        cactusSprite.runAction(cleanupAction);
-        */
     },
-    
     moveCactus: function(speed) {
         for (var i = 0; i < this.cacti.length; i++) {
             var spriteCactus = this.cacti[i];
@@ -707,7 +784,7 @@ var dl = cc.Layer.extend({
         this.trackSpeed = 9.5;
         this.cactusSpeed = 1; 
         // this.pauseTarget(this.spawnCactus); 
-        this.unscheduleUpdate();
+        //this.unscheduleUpdate();
         this.cacti.forEach(cactus => cactus.pause());
         this.birds.forEach(bird => bird.pause());
         this.spriteDino.pause();
@@ -755,6 +832,12 @@ var dl = cc.Layer.extend({
             // setTimeout(this.score += 1, 2000);
             this.theNumber(this.score);
             // this.score += 1;
+
+        }
+        else if(this.gameState == "warmUp")
+        {
+            // this.
+
         }
       
     },
@@ -775,6 +858,7 @@ var dinoScene = cc.Scene.extend({
         var layer = new dl();
         // 3. init layer
         layer.init();
+        // layer.setScale(0.2,0.2);
         // 4. add to scene
         this.addChild(layer);
         // layer.gameState = "running"
