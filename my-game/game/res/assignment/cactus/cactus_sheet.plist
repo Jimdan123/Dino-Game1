@@ -15,7 +15,7 @@
                 <key>spriteSourceSize</key>
                 <string>{48,95}</string>
                 <key>textureRect</key>
-                <string>{{0,0},{48,95}}</string>
+                <string>{{2,2},{48,95}}</string>
                 <key>textureRotated</key>
                 <false/>
             </dict>
@@ -30,7 +30,7 @@
                 <key>spriteSourceSize</key>
                 <string>{99,95}</string>
                 <key>textureRect</key>
-                <string>{{48,0},{99,95}}</string>
+                <string>{{54,2},{99,95}}</string>
                 <key>textureRotated</key>
                 <false/>
             </dict>
@@ -45,7 +45,7 @@
                 <key>spriteSourceSize</key>
                 <string>{102,95}</string>
                 <key>textureRect</key>
-                <string>{{147,0},{102,95}}</string>
+                <string>{{157,2},{102,95}}</string>
                 <key>textureRotated</key>
                 <false/>
             </dict>
@@ -60,7 +60,7 @@
                 <key>spriteSourceSize</key>
                 <string>{40,71}</string>
                 <key>textureRect</key>
-                <string>{{0,95},{40,71}}</string>
+                <string>{{263,2},{40,71}}</string>
                 <key>textureRotated</key>
                 <false/>
             </dict>
@@ -75,7 +75,7 @@
                 <key>spriteSourceSize</key>
                 <string>{68,71}</string>
                 <key>textureRect</key>
-                <string>{{40,95},{68,71}}</string>
+                <string>{{307,2},{68,71}}</string>
                 <key>textureRotated</key>
                 <false/>
             </dict>
@@ -90,7 +90,7 @@
                 <key>spriteSourceSize</key>
                 <string>{105,71}</string>
                 <key>textureRect</key>
-                <string>{{108,95},{105,71}}</string>
+                <string>{{379,2},{105,71}}</string>
                 <key>textureRotated</key>
                 <false/>
             </dict>
@@ -106,9 +106,9 @@
             <key>realTextureFileName</key>
             <string>cactus_sheet.png</string>
             <key>size</key>
-            <string>{249,166}</string>
+            <string>{486,99}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:c0d7f3f7bd23379a4e6f9bbe6b6b5362:ccae13a9f3901b55c07067bba1540e6b:4aab889d09e76ddda915a80c648e3366$</string>
+            <string>$TexturePacker:SmartUpdate:ed3d21209326229c1ff5c3f2dcd18f04:ccae13a9f3901b55c07067bba1540e6b:4aab889d09e76ddda915a80c648e3366$</string>
             <key>textureFileName</key>
             <string>cactus_sheet.png</string>
         </dict>
