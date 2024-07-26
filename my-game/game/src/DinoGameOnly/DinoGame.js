@@ -508,8 +508,34 @@ var dl = cc.Layer.extend({
 
         this.cacti.push(cactusSprite);
         this.addChild(cactusSprite);
-    
-        var moveAction = cc.moveTo(2.22, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen in 4 seconds
+
+        var speed; 
+
+        if (cactusSpriteFrameName == "cactus_1.png") {
+            speed = 2.265;
+        }
+
+        else if (cactusSpriteFrameName == "cactus_2.png") {
+            speed = 2.465;
+        }
+
+        else if (cactusSpriteFrameName == "cactus_3.png") {
+            speed = 2.476; 
+        }
+
+        else if (cactusSpriteFrameName == "cactus_4.png") {
+            speed = 2.265;
+        }
+
+        else if (cactusSpriteFrameName == "cactus_5.png") {
+            speed = 2.36;
+        }
+        else if (cactusSpriteFrameName == "cactus_6.png") { 
+            speed = 2.476; 
+
+        }
+
+        var moveAction = cc.moveTo(speed, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen 
         var cleanupAction = cc.callFunc(function() {
             cactusSprite.removeFromParent();
             this.cacti.splice(this.cacti.indexOf(cactusSprite), 1);
