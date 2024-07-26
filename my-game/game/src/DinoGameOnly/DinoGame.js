@@ -143,13 +143,13 @@ var dl = cc.Layer.extend({
         this.spriteGameOver = new cc.Sprite("#game_over.png");
         this.spriteGameOver.setVisible(false);
         this.spriteGameOver.setPosition(this.sizeWidth /2, this.sizeHeight / 1.5);
-        this.addChild(this.spriteGameOver, 3);
+        this.addChild(this.spriteGameOver, 20);
 
         this.spriteReset = new cc.Sprite("#reset.png");
         this.spriteReset.setVisible(false);
         cc.eventManager.addListener(listener1, this.spriteReset);
         this.spriteReset.setPosition(this.sizeWidth / 2, this.sizeHeight / 2);
-        this.addChild(this.spriteReset, 3);
+        this.addChild(this.spriteReset, 20);
 
         this.spriteTrack2 = new cc.Sprite("#track.png");
         this.spriteTrack2.setAnchorPoint(0.5, 0.5);
@@ -200,9 +200,9 @@ var dl = cc.Layer.extend({
         this.spriteCloud2.setVisible(false); 
         this.spriteCloud3.setVisible(false);
 
-        this.addChild(this.spriteCloud1,1);
-        this.addChild(this.spriteCloud2,1);
-        this.addChild(this.spriteCloud3,1); 
+        this.addChild(this.spriteCloud1, -1);
+        this.addChild(this.spriteCloud2, -1);
+        this.addChild(this.spriteCloud3, -1); 
         
         this.start = new cc.Sprite("White.jpg");
         this.start.setAnchorPoint(0,0);
@@ -383,7 +383,7 @@ var dl = cc.Layer.extend({
 
     resetDino: function()
     {
-         this.spriteDino.setPosition(55,200);
+         this.spriteDino.setPosition(100,200);
 
          this.dinoState = "";
     },
@@ -615,7 +615,7 @@ var dl = cc.Layer.extend({
         cc.log(timeToJump);  
         this.spriteDino.stopAllActions();
         //do cao hien tại suy ra thời gian chạm đất
-        var jumpDown = cc.moveTo(timeToJump, cc.p(55, 200));
+        var jumpDown = cc.moveTo(timeToJump, cc.p(100, 200));
         var AfterJump = cc.callFunc(function() {
             if (!this.downKeyPressed) { 
                 this.dinoState = "run"; 
@@ -806,7 +806,7 @@ var dl = cc.Layer.extend({
         this.trackSpeed *= x; 
         // this.cactusSpeed = this.cactusSpeed * (1 / x); 
         // this.birdSpeed *= 1.1; 
-        this.cactusSpawnInterval = Math.max(this.cactusSpawnInterval * 0.9, 0.44);  
+        this.cactusSpawnInterval = Math.max(this.cactusSpawnInterval * 0.9, 0.3);  
     },
     
     update: function(dt)
@@ -828,7 +828,7 @@ var dl = cc.Layer.extend({
             this.updateClouds(dt);
             this.hitBox();
             //this.theNumber(this.score += 1); 
-            if (this.score % 50 == 0 && this.score != this.lastScore && this.score <= 350) {
+            if (this.score % 125 == 0 && this.score != this.lastScore && this.score <= 1000) {
                 this.increaseGameSpeed();
                 this.lastScore = this.score;  
             }
