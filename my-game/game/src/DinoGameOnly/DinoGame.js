@@ -163,7 +163,7 @@ var dl = cc.Layer.extend({
         this.addChild(this.helloLabel,3);
 
         cc.spriteFrameCache.addSpriteFrames(dinoPos, dino);
-        this.spriteDino = new cc.Sprite("#dino_start.png");
+        this.spriteDino = new cc.Sprite("#dino_jump.png");
         //this.spriteDino.setPosition(55, 200);
         this.spriteDino.setAnchorPoint(0.5,0.5); 
         this.setupDinoAnim();
@@ -321,6 +321,7 @@ var dl = cc.Layer.extend({
         this.removeChild(this.start);
         cc.log("endMoving 2");
         var scaling = cc.scaleTo(2, 1, 1);
+        this.showGameObjects();
         cc.log("endMoving 3");
         var scaleMotion = cc.sequence(scaling, cc.callFunc(this.endScaling, this));
 
