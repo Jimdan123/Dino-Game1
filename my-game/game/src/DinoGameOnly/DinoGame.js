@@ -50,12 +50,17 @@ var dl = cc.Layer.extend({
     cloudMinHeight: 280,
     cloudMaxHeight: 380,
     cloudSpeed: 50,
-    jumpHeight: 260,
-    jumpDuration: 0.5, 
+    trackSpeed: 9.5,
+    cactusSpeed: 1,
+    jumpHeight: 190,
+    jumpDuration: 0.44, 
+    cactusSpawnInterval: 1 + Math.random() * 1.5,
+    birdSpawnInterval: 7 + Math.random() * 3, 
     gameState: "init",
     dinoState: "run",
     press: false,
     score: 0,
+    lastScore: 0,
     sizeWidth: null,
     sizeHeight: null,
     pause: [],
@@ -511,31 +516,34 @@ var dl = cc.Layer.extend({
         this.cacti.push(cactusSprite);
         this.addChild(cactusSprite);
 
-        var speed; 
+        var speed;
+
 
         if (cactusSpriteFrameName == "cactus_1.png") {
-            speed = 2.265;
+            speed = this.cactusSpeed * 2.265;
         }
 
         else if (cactusSpriteFrameName == "cactus_2.png") {
-            speed = 2.465;
-        }
 
+            speed = this.cactusSpeed * 2.465;
+        }
+ 
         else if (cactusSpriteFrameName == "cactus_3.png") {
-            speed = 2.476; 
+            speed = this.cactusSpeed * 2.476;
         }
 
         else if (cactusSpriteFrameName == "cactus_4.png") {
-            speed = 2.265;
+            speed = this.cactusSpeed * 2.265;
         }
 
         else if (cactusSpriteFrameName == "cactus_5.png") {
-            speed = 2.36;
+            speed = this.cactusSpeed * 2.36;
         }
         else if (cactusSpriteFrameName == "cactus_6.png") { 
-            speed = 2.476; 
-
+            speed = this.cactusSpeed * 2.476;
         }
+
+        //this.cactusSpeed *= 0.83333333;
 
         var moveAction = cc.moveTo(speed, cc.p(-cactusSprite.getContentSize().width, 155)); // Move across the screen 
         var cleanupAction = cc.callFunc(function() {
@@ -623,7 +631,9 @@ var dl = cc.Layer.extend({
     gameOver: function() 
     {
         this.gameState = "gameOver";
-        
+        this.cloudSpeed = 50;
+        this.trackSpeed = 9.5;
+        this.cactusSpeed = 1; 
         // this.pauseTarget(this.spawnCactus); 
         this.unscheduleUpdate();
         this.cacti.forEach(cactus => cactus.pause());
@@ -639,7 +649,10 @@ var dl = cc.Layer.extend({
         this.spriteReset.setVisible(true);
     },
 
-    // g
+    increaseGameSpeed: function() {
+        this.trackSpeed *= 1.1; 
+        this.cactusSpeed *= 0.9090909090909091; 
+    },
 
     update: function(dt)
     {
@@ -652,18 +665,19 @@ var dl = cc.Layer.extend({
         if(this.gameState == "running")
         {
             cc.log("this.gameState == running");
-            this.schedule(this.spawnCactus, 1 + Math.random() * 1.5);
-            this.schedule(this.spawnBird, 7 + Math.random() * 4);
-            this.moveTrack(9.5);
+            this.schedule(this.spawnCactus, this.cactusSpawnInterval);
+            this.schedule(this.spawnBird, this.birdSpawnInterval);
+            this.moveTrack(this.trackSpeed);
             this.updateClouds(dt);
             this.hitBox();
             this.theNumber(this.score += 1); 
+            if (this.score % 300 == 0 && this.score != this.lastScore) {
+                this.increaseGameSpeed();
+                this.lastScore = this.score;  
+            }
         }
       
-        // cc.log(this.givenNumbers);
-        // this.theNumber(this.givenNumbers);
     },
-
     
 
 });
@@ -675,7 +689,7 @@ var dinoScene = cc.Scene.extend({
         this._super();
 
         var backgroundLayer = new cc.LayerColor(cc.color(255, 255, 255, 255)); // RGBA for white
-        this.addChild(backgroundLayer, -1); // Add background layer below all other layers
+        this.addChild(backgroundLayer, -1);
 
          // 2. new layer
         var layer = new dl();
