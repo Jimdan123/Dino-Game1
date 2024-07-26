@@ -79,8 +79,17 @@ var dl = cc.Layer.extend({
         var givenNumbers = 0; 
         var scaleLength = 0.7; 
         var scaleWidth = 0.7; 
+<<<<<<< Updated upstream
         var posX = this.sizeWidth - 150; 
         var posY = this.sizeHeight / 1.2;
+=======
+        var posX = this.sizeWidth - 110; 
+        var posY = this.sizeHeight / 1.1;
+        var highScoreX = posX - 200; 
+        var highScoreY = posY;
+        var highScoreScaleLength = 0.7; 
+        var highScoreScaleWidth = 0.7; 
+>>>>>>> Stashed changes
         if ('keyboard' in cc.sys.capabilities)
             {
                 var keyboardListener =
@@ -108,17 +117,20 @@ var dl = cc.Layer.extend({
             this.addChild(this.allDigits[i],10);
             posX += 20;
         }
-// this.highScore = new Array(6);
-        // for (var i = 0; i < 6; i++)
-        // {
-        //     this.highScore[i] = new cc.Sprite("#number_0.png");
-        //     this.highScore[i].setPosition(700,200); 
-        //     this.highScore[i].setScale(scaleLength,scaleWidth); 
-        //     this.addChild(this.highScore[i],10);
-        //     posX += 20;
-        // }
-        // this.removeChild(this.sprite);
+        setInterval(() => {this.score += 1},100);
+        this.highScore = new Array(6);  
+        for (var i = 0; i < 6; i++)
+        {
+            this.highScore[i] = new cc.Sprite("#number_0.png");
+            this.highScore[i].setPosition(highScoreX,highScoreY); 
+            this.highScore[i].setScale(highScoreScaleLength,highScoreScaleWidth);
+            cc.log(this.highScore[i]);
+            this.highScore[i].setScale(scaleLength,scaleWidth); 
+            this.addChild(this.highScore[i],20);
+            highScoreX += 20;
+        }
         cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
+
 
         this.spriteTrack1 = new cc.Sprite("#track.png");
         this.spriteTrack1.setAnchorPoint(0.5, 0.5);
@@ -127,6 +139,7 @@ var dl = cc.Layer.extend({
         // var winsize = cc.director.getWinSize().width;
         // cc.log(winsize);
         this.spriteGameOver = new cc.Sprite("#game_over.png");
+        // cc.log(this.spriteGameOver.getColor());
         // var uiButton = new ccui.Button();
         this.spriteReset = new cc.Sprite("#reset.png");
         this.spriteGameOver.setVisible(false);
@@ -154,8 +167,12 @@ var dl = cc.Layer.extend({
         this.spriteDino = new cc.Sprite("#dino_jump.png");
         this.spriteDino.setPosition(200, 200);
         this.spriteDino.setAnchorPoint(0.5,0.5); 
+<<<<<<< Updated upstream
         this.addChild(this.spriteDino, 10);
 
+=======
+        this.addChild(this.spriteDino, 20);
+>>>>>>> Stashed changes
 
         cc.spriteFrameCache.addSpriteFrames(birdPos, bird);
         this.spriteBird = new cc.Sprite("#bird_1.png");
@@ -172,11 +189,16 @@ var dl = cc.Layer.extend({
         cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
         this.spriteCloud3.setPosition(this.sizeWidth,cloudHeight);
 
+<<<<<<< Updated upstream
         this.addChild(this.spriteCloud1, -1);
         this.addChild(this.spriteCloud2, -1);
         this.addChild(this.spriteCloud3, -1); 
+=======
+        this.addChild(this.spriteCloud1,12);
+        this.addChild(this.spriteCloud2,12);
+        this.addChild(this.spriteCloud3,12); 
+>>>>>>> Stashed changes
         
-
         // cc.eventManager.addListener(
         //     {
         //         event:cc.EventListener.MOUSE,
@@ -237,6 +259,16 @@ var dl = cc.Layer.extend({
     theNumber: function(givenNumbers)
     {
         // while (true){cc.log(this.gameState);}
+        if(this.gameState == "gameOver") 
+        {
+            for (var i = 5; i > -1; i--)
+            {
+                var tmp = givenNumbers % 10;  
+                var frameName = "number_" +  tmp + ".png";
+                this.highScore[i].setSpriteFrame(frameName);
+                givenNumbers = parseInt(givenNumbers / 10);
+            }
+        }
         for (var i = 5; i > -1; i--)
         {
             var tmp = givenNumbers % 10;  
@@ -276,7 +308,8 @@ var dl = cc.Layer.extend({
         }
         for(var i = 0; i < this.allDigits.length; i++)
         {
-            this.allDigits[i].setVisible(false);    
+            this.allDigits[i].setVisible(false);   
+            this.highScore[i].setVisible(false); 
         }
         for(var i = 0; i < this.birds.length; i++)
         {
@@ -316,6 +349,7 @@ var dl = cc.Layer.extend({
         for(var i = 0; i < this.allDigits.length; i++)
         {
             this.allDigits[i].setVisible(true);
+            this.highScore[i].setVisible(true);
         }
     },
 
@@ -670,11 +704,17 @@ var dl = cc.Layer.extend({
             this.moveTrack(this.trackSpeed);
             this.updateClouds(dt);
             this.hitBox();
+<<<<<<< Updated upstream
             this.theNumber(this.score += 1); 
             if (this.score % 300 == 0 && this.score != this.lastScore) {
                 this.increaseGameSpeed();
                 this.lastScore = this.score;  
             }
+=======
+            // setTimeout(this.score += 1, 2000);
+            this.theNumber(this.score);
+            // this.score += 1;
+>>>>>>> Stashed changes
         }
       
     },
