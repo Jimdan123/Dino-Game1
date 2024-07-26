@@ -609,12 +609,12 @@ var dl = cc.Layer.extend({
     },
     
     moveCactus: function(speed) {
-        for (var i = 0; i < this.cacti.length; i++) {
+        for (var i = this.cacti.length - 1; i >= 0; i--) {
             var spriteCactus = this.cacti[i];
             spriteCactus.x -= speed;
             if (spriteCactus.x < -spriteCactus.getContentSize().width) {
                 spriteCactus.removeFromParent();
-                this.cacti.splice(this.cacti.indexOf(spriteCactus), 1);
+                this.cacti.splice(this.cacti.indexOf(spriteCactus), 0);
             }
         }
 
