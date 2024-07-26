@@ -131,6 +131,8 @@ var dl = cc.Layer.extend({
             this.addChild(this.highScore[i],1);
             highScoreX += 20;
         }
+        setInterval(() =>{this.score += 1},50);
+
         cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
 
 
@@ -454,7 +456,6 @@ var dl = cc.Layer.extend({
 
         this.score = 0;
         this.showScore();
-        setInterval(() =>{this.score += 1},50);
 
         this.showGameObjects();
         this.cacti.forEach(cactus => cactus.resume());
