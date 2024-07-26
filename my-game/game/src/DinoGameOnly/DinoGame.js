@@ -790,6 +790,7 @@ var dl = cc.Layer.extend({
         this.cactusSpeed = 1; 
         // this.pauseTarget(this.spawnCactus); 
         //this.unscheduleUpdate();
+        this.cactusSpawnInterval = 1;
         this.cacti.forEach(cactus => cactus.pause());
         this.birds.forEach(bird => bird.pause());
         this.spriteDino.pause();
