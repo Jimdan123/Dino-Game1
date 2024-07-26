@@ -74,8 +74,8 @@ var dl = cc.Layer.extend({
         var givenNumbers = 0; 
         var scaleLength = 0.7; 
         var scaleWidth = 0.7; 
-        var posX = this.sizeWidth - 110; 
-        var posY = this.sizeHeight / 1.1;
+        var posX = this.sizeWidth - 150; 
+        var posY = this.sizeHeight / 1.2;
         if ('keyboard' in cc.sys.capabilities)
             {
                 var keyboardListener =
@@ -129,14 +129,14 @@ var dl = cc.Layer.extend({
         // cc.log(this.sizeWidth);
         // cc.log(this.sizeHeight);
         this.spriteGameOver.setPosition(this.sizeWidth /2, this.sizeHeight / 1.5);
-        this.addChild(this.spriteGameOver, 0);
+        this.addChild(this.spriteGameOver, 20);
 
         this.spriteReset.setVisible(false);
         //this.spriteReset.myParentLayer = this;
         cc.eventManager.addListener(listener1, this.spriteReset);
         // this.spriteGameOver.setAnchorPoint(0.5, 0.5);
         this.spriteReset.setPosition(this.sizeWidth / 2, this.sizeHeight / 2);
-        this.addChild(this.spriteReset, 0);
+        this.addChild(this.spriteReset, 20);
 
         this.spriteTrack2 = new cc.Sprite("#track.png");
         this.spriteTrack2.setAnchorPoint(0.5, 0.5);
@@ -149,7 +149,8 @@ var dl = cc.Layer.extend({
         this.spriteDino = new cc.Sprite("#dino_jump.png");
         this.spriteDino.setPosition(200, 200);
         this.spriteDino.setAnchorPoint(0.5,0.5); 
-        this.addChild(this.spriteDino, 0);
+        this.addChild(this.spriteDino, 10);
+
 
         cc.spriteFrameCache.addSpriteFrames(birdPos, bird);
         this.spriteBird = new cc.Sprite("#bird_1.png");
@@ -166,9 +167,9 @@ var dl = cc.Layer.extend({
         cloudHeight = this.cloudMinHeight + Math.random() * (this.cloudMaxHeight - this.cloudMinHeight);
         this.spriteCloud3.setPosition(this.sizeWidth,cloudHeight);
 
-        this.addChild(this.spriteCloud1,0);
-        this.addChild(this.spriteCloud2,0);
-        this.addChild(this.spriteCloud3,0); 
+        this.addChild(this.spriteCloud1, -1);
+        this.addChild(this.spriteCloud2, -1);
+        this.addChild(this.spriteCloud3, -1); 
         
 
         // cc.eventManager.addListener(
@@ -298,6 +299,7 @@ var dl = cc.Layer.extend({
         this.gameState = "running";
         this.dinoState = "run";
         this.spriteDino.setVisible(true); 
+        this.spriteDino.setSpriteFrame("dino_run_1.png");
         this.spriteCloud1.setVisible(true);
         this.spriteCloud2.setVisible(true);
         this.spriteCloud3.setVisible(true);
@@ -504,7 +506,7 @@ var dl = cc.Layer.extend({
         var cactusSprite = new cc.Sprite(cc.spriteFrameCache.getSpriteFrame(cactusSpriteFrameName));
         
         cactusSprite.setAnchorPoint(0.5, 0);
-        cactusSprite.setPosition(cc.director.getWinSize().width + cactusSprite.getContentSize().width, 160); 
+        cactusSprite.setPosition(cc.director.getWinSize().width + cactusSprite.getContentSize().width, 155); 
 
         this.cacti.push(cactusSprite);
         this.addChild(cactusSprite);
@@ -535,7 +537,7 @@ var dl = cc.Layer.extend({
 
         }
 
-        var moveAction = cc.moveTo(speed, cc.p(-cactusSprite.getContentSize().width, 160)); // Move across the screen 
+        var moveAction = cc.moveTo(speed, cc.p(-cactusSprite.getContentSize().width, 155)); // Move across the screen 
         var cleanupAction = cc.callFunc(function() {
             cactusSprite.removeFromParent();
             this.cacti.splice(this.cacti.indexOf(cactusSprite), 1);
@@ -621,7 +623,7 @@ var dl = cc.Layer.extend({
     gameOver: function() 
     {
         this.gameState = "gameOver";
-       
+        
         // this.pauseTarget(this.spawnCactus); 
         this.unscheduleUpdate();
         this.cacti.forEach(cactus => cactus.pause());
@@ -630,6 +632,7 @@ var dl = cc.Layer.extend({
         this.spriteCloud1.pause(); 
         this.spriteCloud2.pause(); 
         this.spriteCloud3.pause();
+        this.spriteDino.setSpriteFrame("dino_dead.png");
         cc.log('Game Over!');
         // Restart Here KHANG
         this.spriteGameOver.setVisible(true);
@@ -649,8 +652,8 @@ var dl = cc.Layer.extend({
         if(this.gameState == "running")
         {
             cc.log("this.gameState == running");
-            this.schedule(this.spawnCactus, 2.5);
-            this.schedule(this.spawnBird, 7);
+            this.schedule(this.spawnCactus, 1 + Math.random() * 1.5);
+            this.schedule(this.spawnBird, 7 + Math.random() * 4);
             this.moveTrack(9.5);
             this.updateClouds(dt);
             this.hitBox();
@@ -670,6 +673,10 @@ var dinoScene = cc.Scene.extend({
     {
         // 1. super init first
         this._super();
+
+        var backgroundLayer = new cc.LayerColor(cc.color(255, 255, 255, 255)); // RGBA for white
+        this.addChild(backgroundLayer, -1); // Add background layer below all other layers
+
          // 2. new layer
         var layer = new dl();
         // 3. init layer
