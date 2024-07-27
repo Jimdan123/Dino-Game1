@@ -37,7 +37,7 @@ var listener1 = cc.EventListener.create({
 });
 
 var dl = cc.Layer.extend({
-    startDuration: 0.8, 
+    startDuration: 0.5, 
     helloLabel:null,
     tmpScore: null,
     sprite:null,
@@ -158,6 +158,12 @@ var dl = cc.Layer.extend({
         this.spriteTrack2.setVisible(false);
         this.spriteTrack2.setPosition((this.sizeWidth / 2) + this.spriteTrack1.getContentSize().width, 165);
         this.addChild(this.spriteTrack2, 1);
+
+        this.spriteTrack3 = new cc.Sprite("#track.png"); 
+        this.spriteTrack3.setAnchorPoint(0,0); 
+        this.spriteTrack3.setVisible(false); 
+        this.spriteTrack3.setPosition(0, 150);
+        this.addChild(this.spriteTrack3,0);
 
         this.helloLabel = new cc.LabelTTF("Press any key to start", "Outlined", 38);
         this.helloLabel.setFontFillColor(cc.color(105,105,105));
@@ -307,7 +313,7 @@ var dl = cc.Layer.extend({
     movingAtStart: function() 
     {
         cc.log(this.startDuration);
-
+        this.spriteTrack3.setVisible(true);
         var moving = cc.MoveTo.create(this.startDuration,cc.p(this.sizeWidth, 200));
        
         var movingMotion = cc.sequence(moving,cc.callFunc(this.endMoving, this));
@@ -322,19 +328,13 @@ var dl = cc.Layer.extend({
         cc.log("endMoving 1");
         this.removeChild(this.start);
         cc.log("endMoving 2");
-        var scaling = cc.scaleTo(2, 1, 1);
-        this.showGameObjects();
+        var scaling = cc.scaleTo(1, 1, 1);
         cc.log("endMoving 3");
-        var scaleMotion = cc.sequence(scaling, cc.callFunc(this.endScaling, this));
+        var scaleMotion = cc.sequence(scaling,cc.callFunc(this.gameStart,this));
 
         cc.log("endMoving 4");
 
         this.runAction(scaleMotion);
-    },
-
-    endScaling: function()
-    {
-        this.gameStart();
     },
 
     theNumber: function(givenNumbers)
@@ -428,6 +428,7 @@ var dl = cc.Layer.extend({
     hideMainMenuObj: function()
     {
         this.helloLabel.setVisible(false);
+        this.spriteTrack3.setVisible(false);
     },
 
     showResultMenuObj: function()
