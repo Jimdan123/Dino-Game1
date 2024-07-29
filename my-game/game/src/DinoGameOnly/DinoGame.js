@@ -328,7 +328,7 @@ var dl = cc.Layer.extend({
         cc.log("endMoving 1");
         this.removeChild(this.start);
         cc.log("endMoving 2");
-        var scaling = cc.scaleTo(1, 1, 1);
+        var scaling = cc.scaleTo(0.5, 1, 1);
         cc.log("endMoving 3");
         var scaleMotion = cc.sequence(scaling,cc.callFunc(this.gameStart,this));
 
@@ -485,6 +485,10 @@ var dl = cc.Layer.extend({
     onKeyPressed: function(key)
     {
         // Jump
+        // if (this.gameState == "mainMenu")
+        // {
+        //     this.blinkAction();
+        // }
         if (this.gameState == "gameOver") return;
 
         if (this.gameState == "mainMenu")
@@ -510,6 +514,7 @@ var dl = cc.Layer.extend({
     
                 if (this.dinoState === "run")
                 {
+                    // cc.log("duck");
                     this.dinoState = "duck";
                     this.duck();
                 }
@@ -586,6 +591,10 @@ var dl = cc.Layer.extend({
 
         
         //ani blinking eye to do list
+        // this.animBlink = new cc.Animation();
+        // this.animeBlink.addSpriteFrame(cc.spriteFrameCache.getSpriteFrame("dino_start.png"));
+        // this.animeBlink.addSpriteFrame(cc.spriteFrameCache.getSpriteFrame("dino_jump.png"));
+        // this.animeBlink.setDelayPerUnit(Math.random());
         
     },
 
@@ -600,6 +609,11 @@ var dl = cc.Layer.extend({
         var jumpMotion = cc.sequence(jumpAnimate, jumpUp, jumpDown);
     
         return jumpMotion;
+    },
+
+    blinkAction: function()
+    {
+        this.spriteDino.runAction(cc.animate(this.animBlink));
     },
 
     jump: function() {
