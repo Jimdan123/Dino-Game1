@@ -186,7 +186,7 @@ var dl = cc.Layer.extend({
         var birdAnimation = new cc.Animation(this.birdFrames, 0.2);
         var birdAnimate = cc.animate(birdAnimation).repeatForever();
         this.spriteBird.runAction(birdAnimate);
-        this.addChild(this.spriteBird);
+        this.addChild(this.spriteBird, 1);
         this.spriteBird.setVisible(false);
         this.birds.push(this.spriteBird);
 
@@ -731,7 +731,7 @@ var dl = cc.Layer.extend({
         if (this.gameState != "running") return;
         
         var size = cc.director.getWinSize();
-        var birdHeight = 210 + Math.random() * 150;
+        var birdHeight = 202 + Math.random() * 150;
         if (this.spriteBird.x >= -100) {
             return;
         }
@@ -824,7 +824,7 @@ var dl = cc.Layer.extend({
         this.trackSpeed *= x; 
         // this.cactusSpeed = this.cactusSpeed * (1 / x); 
         // this.birdSpeed *= 1.1; 
-        this.cactusSpawnInterval = Math.max(this.cactusSpawnInterval * 0.9, 0.3);  
+        this.cactusSpawnInterval = Math.max(this.cactusSpawnInterval * 0.825, 0.4);  
     },
     
     update: function(dt)
