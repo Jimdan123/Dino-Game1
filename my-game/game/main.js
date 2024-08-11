@@ -19,7 +19,7 @@ cc.game.onStart = function() {
     cc.LoaderScene.preload(g_resources, function () {
 
         // if load resources success, run this scene
-        cc.director.runScene(new dinoScene());
+        cc.director.runScene(new MyScene());
 
     }, this);
 };

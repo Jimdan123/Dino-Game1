@@ -7,6 +7,7 @@
     "renderMode" : 0,
     "engineDir":"../engine",
 
+
     "modules" : ["cocos2d"],
 
     "jsList" : [
@@ -14,6 +15,9 @@
         "src/OtherScene/sqrt.js",
         "src/OtherScene/my_module.js",
         "src/OtherScene/NewApp.js",
-        "src/DinoGameOnly/DinoGame.js"
+        "src/DinoGameOnly/myAccount.js",
+        "src/DinoGameOnly/DinoGame.js",
+        "src/DinoGameOnly/myApp.js",
+        "src/DinoGameOnly/myConnection.js"
     ]
 }

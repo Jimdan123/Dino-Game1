@@ -65,8 +65,10 @@ var dl = cc.Layer.extend({
     sizeHeight: null,
     delay: true,
     delayValue: 10000,
+    userInteraction: "Active", 
     init:function () 
     {
+        // connectToMyServer();
         this.tmpScore = 0;
         this.sizeWidth =  cc.director.getWinSize().width; 
         this.sizeHeight = cc.director.getWinSize().height;
@@ -265,17 +267,17 @@ var dl = cc.Layer.extend({
     distance: 1,
     tick: function()
     {
-        this.cactusCooldown -= 0.1;
-        if (this.cactusCooldown  <= 0)
-        {
-            this.cactusCooldown = this.cactusSpawnInterval + Math.random() * 0.5;
-            if (Math.random() > 0.3) {
-                this.spawnCactus();
-            }
-            else {
-                this.spawnBird();
-            }
-        }
+        // this.cactusCooldown -= 0.1;
+        // if (this.cactusCooldown  <= 0)
+        // {
+        //     this.cactusCooldown = this.cactusSpawnInterval + Math.random() * 0.5;
+        //     if (Math.random() > 0.3) {
+        //         this.spawnCactus();
+        //     }
+        //     else {
+        //         this.spawnBird();
+        //     }
+        // }
     },
 
     turningDelayTrue: function()
@@ -489,11 +491,17 @@ var dl = cc.Layer.extend({
         // {
         //     this.blinkAction();
         // }
-        if (this.gameState == "gameOver") return;
+        if (this.gameState == "gameOver") 
+        {
+            this.userInteraction = this.gameState;
+            this.userInteraction = "gameOver";
+            return;
+        }
 
         if (this.gameState == "mainMenu")
         {
             this.warmingUp();
+            this.userInteraction = "warmingUp"; 
         }
         else if (this.gameState == "running")
         {
@@ -505,7 +513,7 @@ var dl = cc.Layer.extend({
                     this.jump();
                     this.spriteDino.setSpriteFrame("dino_jump.png");
                 }
-    
+                
                 cc.log("Key space pressed");
             }
             else if (key === cc.KEY.down) 
@@ -526,7 +534,7 @@ var dl = cc.Layer.extend({
                 cc.log("Key down pressed");
             }
         }
-        
+        //sendMessageInGameRoom(this.userInteraction);
         // else 
         // { 
         //     this.dinoState = "run";
@@ -862,7 +870,11 @@ var dl = cc.Layer.extend({
         }
       
     },
-     
+    
+    sendToServer: function(message)
+    {
+        sendMessageInGameRoom(message);
+    },
 
 });
 
