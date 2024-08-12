@@ -18,6 +18,7 @@
         "src/DinoGameOnly/myAccount.js",
         "src/DinoGameOnly/DinoGame.js",
         "src/DinoGameOnly/myApp.js",
-        "src/DinoGameOnly/myConnection.js"
+        "src/DinoGameOnly/myConnection.js",
+        "src/DinoGameOnly/enumTochangState.js"
     ]
 }

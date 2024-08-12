@@ -1,5 +1,6 @@
 
 // Create a single touch event listener and write the callback code
+
 var listener1 = cc.EventListener.create({
     event: cc.EventListener.TOUCH_ONE_BY_ONE,
     // When "swallow touches" is true, then returning 'true' from the onTouchBegan method will "swallow" the touch event, preventing other listeners from using it.
@@ -30,8 +31,12 @@ var listener1 = cc.EventListener.create({
     onTouchEnded: function (touch, event) {         
         var target = event.getCurrentTarget();
         cc.log("sprite onTouchesEnded.. ");
-        target.setOpacity(255);
-        target.getParent().gameStart();
+        if (myRole == UserJob.host)
+            {
+            target.setOpacity(255);
+            target.getParent().gameStart();
+            target.getParent().sendToServer(gameState.gameStart);
+            }
         //Reset zOrder and the display sequence will change
     }
 });
@@ -491,49 +496,81 @@ var dl = cc.Layer.extend({
         // {
         //     this.blinkAction();
         // }
+       
+
+        this.userInteraction = changingDinoStateForUser.nothing;
         if (this.gameState == "gameOver") 
         {
             this.userInteraction = this.gameState;
-            this.userInteraction = "gameOver";
             return;
         }
 
         if (this.gameState == "mainMenu")
         {
-            this.warmingUp();
-            this.userInteraction = "warmingUp"; 
+            if(myRole == UserJob.host )
+            {
+                this.warmingUp();
+                this.userInteraction = changingDinoStateForUser.warmingUp;
+                cc.log(changingDinoStateForUser.warmingUp);
+            }
         }
         else if (this.gameState == "running")
         {
-            if (key === cc.KEY.space) 
+            if (myRole == UserJob.host)
             {
-                if (this.dinoState === "run") 
+                if (key === cc.KEY.space) 
                 {
-                    this.dinoState = "jump";
-                    this.jump();
-                    this.spriteDino.setSpriteFrame("dino_jump.png");
+                    if (this.dinoState === "run") 
+                    {
+                        this.dinoState = "jump";
+                        this.jump();
+                        this.spriteDino.setSpriteFrame("dino_jump.png");
+                        this.userInteraction = changingDinoStateForUser.jump;
+                    }
+                    
+                    cc.log("Key space pressed");
                 }
-                
-                cc.log("Key space pressed");
+                else if (key === cc.KEY.down) 
+                {
+                    this.downKeyPressed = true;
+        
+                    if (this.dinoState === "run")
+                    {
+                        // cc.log("duck");
+                        this.dinoState = "duck";
+                        this.duck();
+                        this.userInteraction = changingDinoStateForUser.duck;
+                    }
+                    else if (this.dinoState === "jump") {
+                        this.userInteraction = changingDinoStateForUser.cancelJump;
+                        // print("co Jump");
+                        this.cancelJump();
+                    }
+                    
+                    cc.log("Key down pressed");
+                }
             }
-            else if (key === cc.KEY.down) 
+            else if (myRole == UserJob.guest)
             {
-                this.downKeyPressed = true;
-    
-                if (this.dinoState === "run")
+                if(key == cc.KEY["["])
                 {
-                    // cc.log("duck");
-                    this.dinoState = "duck";
-                    this.duck();
+                    var cactusType = Math.floor(Math.random() * 6) + 1; // Random cactus type between 1 and 6
+
+                    this.spawnCactus(cactusType); 
+                   
+                    this.sendToServer(spawning.cactus, cactusType);
                 }
-                else if (this.dinoState === "jump") {
-                    // print("co Jump");
-                    this.cancelJump();
+                else if(key == cc.KEY["]"])
+                {
+                    var birdHeight = 202 + Math.random() * 150;
+                    this.spawnBird(birdHeight); 
+                    this.sendToServer(spawning.bird, birdHeight);
                 }
-                
-                cc.log("Key down pressed");
             }
+           
         }
+        if(myRole == "Host")
+            this.sendToServer(this.userInteraction);
         //sendMessageInGameRoom(this.userInteraction);
         // else 
         // { 
@@ -544,6 +581,7 @@ var dl = cc.Layer.extend({
 
     onKeyReleased: function(key)
     {
+        this.userInteraction = changingDinoStateForUser.nothing;
         if (key === cc.KEY.space) 
         {   
             if (this.dinoState == "jump") {
@@ -562,16 +600,19 @@ var dl = cc.Layer.extend({
         else if (key === cc.KEY.down) 
         {
             this.downKeyPressed = false; 
+            this.userInteraction = changingDinoStateForUser.keyReleased;
             if(this.gameState == "gameOver") return;
             
             if (this.dinoState != "jump")
             {
                 this.dinoState = "run";
                 this.run();
+                this.userInteraction = changingDinoStateForUser.running;
             }
-        
             cc.log("Key down released");
         }
+        if(myRole == "Host")
+            this.sendToServer(this.userInteraction);
     },
 
     setupDinoAnim: function() {
@@ -695,11 +736,11 @@ var dl = cc.Layer.extend({
     },
 
     //cactusSpawnTime
-    spawnCactus: function() 
+    spawnCactus: function(cactusType) 
     {
         if (this.gameState != "running") return;
 
-        var cactusType = Math.floor(Math.random() * 6) + 1; // Random cactus type between 1 and 6
+       
         var cactusSpriteFrameName = "cactus_" + cactusType + ".png";
         var cactusSprite = new cc.Sprite(cc.spriteFrameCache.getSpriteFrame(cactusSpriteFrameName));
         
@@ -735,11 +776,10 @@ var dl = cc.Layer.extend({
         // }
     },
 
-    spawnBird: function() {
+    spawnBird: function(birdHeight) {
         if (this.gameState != "running") return;
         
         var size = cc.director.getWinSize();
-        var birdHeight = 202 + Math.random() * 150;
         if (this.spriteBird.x >= -100) {
             return;
         }
@@ -842,7 +882,6 @@ var dl = cc.Layer.extend({
 
         // dy += v0*dt;
         // v0 -= g*dt;
-        
         // this.givenNumbers = this.changingNumber(this.givenNumbers);
         if(this.gameState == "running")
         {
@@ -871,12 +910,17 @@ var dl = cc.Layer.extend({
       
     },
     
-    sendToServer: function(message)
+    sendToServer: function(message, moreInfo)
     {
-        sendMessageInGameRoom(message);
+        if (moreInfo)
+            sendMessageToSpawnStuff(message,moreInfo);
+        else
+            sendMessageInGameRoom(message);
     },
 
 });
+
+var myDinoLayerInst;
 
 var dinoScene = cc.Scene.extend({
     onEnter:function () 
@@ -887,13 +931,13 @@ var dinoScene = cc.Scene.extend({
         var backgroundLayer = new cc.LayerColor(cc.color(255, 255, 255, 255)); // RGBA for white
         this.addChild(backgroundLayer, -1);
 
-         // 2. new layer
-        var layer = new dl();
+        // 2. new layer
+        myDinoLayerInst = new dl();
         // 3. init layer
-        layer.init();
+        myDinoLayerInst.init();
         // layer.setScale(0.2,0.2);
         // 4. add to scene
-        this.addChild(layer);
+        this.addChild(myDinoLayerInst);
         // layer.gameState = "running"
         //cc.log("MyLayer - onEnter()");
         this.scheduleUpdate();
@@ -902,4 +946,6 @@ var dinoScene = cc.Scene.extend({
 });
 
 cc.director.runScene(new dinoScene());
+
+//cc.director.getRunningScene()
     

@@ -2,12 +2,8 @@ var gold ;
 var level;
 var myRole = "";
 var idRoom;
-
-function setRole(role)
-{
-    myRole = role;
-    cc.log(myRole);
-}
+var changState = "";
+//variable to control the state 
 
 
 

@@ -12,6 +12,7 @@ var CTRL_TO_CREATE_NEW_USER = 10;
 var CTRL_TO_CHANGE_PASS = 11;
 var CTRL_TO_LOGOUT = 12;
 var CTRL_TO_USER_INFO = 13;
+var CTRL_TO_SEN_MSG_TO_SPAWN_STUFF = 14;
 
 
 function connectToMyServer(url)
@@ -335,6 +336,17 @@ function sendCreateGameroomrq(id, pin)
     }
 }
 
+function sendMessageToSpawnStuff(msg, info)
+{
+    info = info.toString();
+    let buf = new Uint8Array(msg.length + info.length + 3); 
+    let off = 0; 
+    off = packInt8(CTRL_TO_SEN_MSG_TO_SPAWN_STUFF, buf, off); 
+    off = packString(msg, buf, off); 
+    off = packString(info, buf, off);
+    webSocket.send(buf); 
+}
+
 function sendMessageInGameRoom(msg)
 {
     if (webSocket && webSocket.readyState == WebSocket.OPEN)
@@ -386,7 +398,6 @@ function sendReqToRunDinoGame()
         off = packString("run",buf, off);
 
         webSocket.send(buf);
-
     }
     else 
     {
@@ -440,6 +451,86 @@ function sendUserInfo()
     }
 }
 
+function recieveSignamFromOther(msg)
+{
+    var params = msg.split("=>");
+    changState = params[1];
+    cc.log("ChangState = " + changState);
+    switch (changState)
+    {
+        case changingDinoStateForUser.warmingUp:
+            {
+                myDinoLayerInst.warmingUp();
+                myDinoLayerInst.userInteraction = "warmingup";
+                break;
+            }
+
+        case changingDinoStateForUser.jump: 
+            {
+                myDinoLayerInst.dinoState = "jump";
+                myDinoLayerInst.jump();
+                myDinoLayerInst.spriteDino.setSpriteFrame("dino_jump.png");
+                break;
+            }
+
+        case changingDinoStateForUser.duck: 
+            {
+                myDinoLayerInst.downKeyPressed = true;
+                myDinoLayerInst.dinoState = "duck";
+                myDinoLayerInst.duck();
+                break;
+            }
+
+        case changingDinoStateForUser.cancelJump: 
+            {
+                myDinoLayerInst.downKeyPressed = true;
+                myDinoLayerInst.cancelJump();
+                break;
+            }
+
+        case changingDinoStateForUser.nothing:    
+            {
+                break;
+            }
+
+        case changingDinoStateForUser.keyReleased:
+            {
+                myDinoLayerInst.downKeyPressed = false;
+                break;
+            }
+        
+        case changingDinoStateForUser.running:
+            {
+                myDinoLayerInst.dinoState = "run";
+                myDinoLayerInst.run();
+                break;
+            }
+        
+        case spawning.bird:
+            {
+                var birdHeight = parseInt(params[2]);
+                myDinoLayerInst.spawnBird(birdHeight);
+                break; 
+            }
+        
+        case spawning.cactus: 
+            {
+                var cactusType = parseInt(params[2]);
+                cc.log("params[2] = " + params[2]);
+                cc.log("cactusType = " + cactusType);
+                myDinoLayerInst.spawnCactus(cactusType);
+                break;
+            }
+        
+        case gameState.gameStart: 
+            {
+                myDinoLayerInst.gameStart();
+                break;
+            }
+    }
+    cc.log(changState);
+}
+
 function handleResponse(arr_buffer) 
 {
     // binary frame
@@ -448,6 +539,7 @@ function handleResponse(arr_buffer)
     
     const decoder = new TextDecoder();
     var str = decoder.decode(arr_buffer);
+    cc.log("handleResponse str = " + str);
     var CTRL_CODE = parseInt(str[0]);
     var array = [10,11,12,13];
     for(var i = 0; i < array.length; i++)
@@ -458,6 +550,7 @@ function handleResponse(arr_buffer)
             break;
         }
     }
+    cc.log(CTRL_CODE);
     var param1 = ""; 
     var param2 = "";
     cc.log(typeof str);
@@ -474,6 +567,7 @@ function handleResponse(arr_buffer)
             break;
         
         case CTRL_TO_CHANGE_GAME:
+            cc.log("runnning");
             cc.director.runScene(new dinoScene());
             break;
         
@@ -495,7 +589,7 @@ function handleResponse(arr_buffer)
                     if(str[i] == " ")
                         continue;
                     param2 += str[i];
-                    cc.log(str[i]);
+                    // cc.log(str[i]);
                 }
             }
             cc.log(param1 + param2);
@@ -506,6 +600,7 @@ function handleResponse(arr_buffer)
             break;
 
         case CTRL_TO_SEND_MSG_IN_GAME_ROOM: 
+            recieveSignamFromOther(str);
             break;
 
         case CTRL_TO_LOGIN_GAME_ROOM: 
@@ -522,7 +617,7 @@ function handleResponse(arr_buffer)
                     if(str[i] == " ")
                         continue;
                     param2 += str[i];
-                    cc.log(str[i]);
+                    // cc.log(str[i]);
                 }
             }
             cc.log(param1 + param2);

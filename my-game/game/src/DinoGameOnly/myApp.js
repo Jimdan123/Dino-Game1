@@ -163,9 +163,12 @@ var MyLayer = cc.Layer.extend({
             case "run": 
                 {
                     // cc.log(role);
-                    cc.log(myRole);
+                    
                     if(myRole == "Host")
+                    {
+                        cc.log(myRole);
                         sendReqToRunDinoGame();
+                    }
                     break;
                 }
             
