@@ -17,7 +17,7 @@ var listener1 = cc.EventListener.create({
 
         //Check the click area
         if (cc.rectContainsPoint(rect, locationInNode)) {       
-            cc.log("sprite began... x = " + locationInNode.x + ", y = " + locationInNode.y);
+            // cc.log("sprite began... x = " + locationInNode.x + ", y = " + locationInNode.y);
             target.opacity = 180;
             return true;
         }
@@ -30,13 +30,16 @@ var listener1 = cc.EventListener.create({
     //Process the touch end event
     onTouchEnded: function (touch, event) {         
         var target = event.getCurrentTarget();
-        cc.log("sprite onTouchesEnded.. ");
+        // cc.log("sprite onTouchesEnded.. ");
         if (myRole == UserJob.host)
-            {
+        {
             target.setOpacity(255);
-            target.getParent().gameStart();
-            target.getParent().sendToServer(gameState.gameStart);
-            }
+            var dinoLayer = target.getParent();
+
+            dinoLayer.gameStart();
+            dinoLayer.userInteraction = gameState.gameStart;
+            dinoLayer.sendToServer(gameState.gameStart);
+        }
         //Reset zOrder and the display sequence will change
     }
 });
@@ -56,7 +59,7 @@ var dl = cc.Layer.extend({
     cloudMinHeight: 280,
     cloudMaxHeight: 380,
     cloudSpeed: 50,
-    trackSpeed: 9.5,
+    trackSpeed: 9.5/ 0.017,
     cactusSpeed: 1,
     jumpHeight: 190,
     jumpDuration: 0.44, 
@@ -82,7 +85,7 @@ var dl = cc.Layer.extend({
         this._super();
         this.downKeyPressed = false;
         this.gameState = "mainMenu";
-        cc.log(this.gameState);
+        // cc.log(this.gameState);
         this.cacti = [];
         this.birds = [];
         var givenNumbers = 0; 
@@ -138,7 +141,7 @@ var dl = cc.Layer.extend({
             this.addChild(this.highScore[i],1);
             highScoreX += 20;
         }
-        setInterval(() =>{this.score += 1},50);
+        // setInterval(() =>{this.score += 1},50);
 
         cc.spriteFrameCache.addSpriteFrames(gameOverPos, gameOver);
 
@@ -243,7 +246,22 @@ var dl = cc.Layer.extend({
             };
             cc.eventManager.addListener(keyboardListener, this);
         } 
+        cc.eventManager.addCustomListener(cc.game.EVENT_HIDE, function() { 
+            cc.log("Pause");
+            cc.director.pause();
+            this.userInteraction = gameState.windowClose; 
+            this.sendToServer(gameState.windowClose, time);
+        }.bind(this));
+    
+        cc.eventManager.addCustomListener(cc.game.EVENT_SHOW, function() {
+            cc.log("Resume");
+            cc.director.resume();
+            this.userInteraction = gameState.windowOpen; 
+            this.sendToServer(gameState.windowOpen, time);
 
+        }.bind(this));
+
+         
         
         this.theNumber(givenNumbers);
         // get screen size
@@ -251,7 +269,7 @@ var dl = cc.Layer.extend({
 
         this.cactusCooldown = this.cactusSpawnInterval ;
         this.birdCooldown = this.birdSpawnInterval ;
-        this.schedule(this.tick, 0.1);
+        this.schedule(this.tick, 2);
 
         this.setupMainMenuState();
         
@@ -268,21 +286,31 @@ var dl = cc.Layer.extend({
     gameTime: 0,
     //cactusCooldown: 0,
     lastCactusTime: 0,
-    birdCooldown: 0,
     distance: 1,
+    cooldown: 5, 
     tick: function()
     {
-        // this.cactusCooldown -= 0.1;
-        // if (this.cactusCooldown  <= 0)
+
+        // if(this.cooldown >= 5)
         // {
-        //     this.cactusCooldown = this.cactusSpawnInterval + Math.random() * 0.5;
-        //     if (Math.random() > 0.3) {
-        //         this.spawnCactus();
-        //     }
-        //     else {
-        //         this.spawnBird();
-        //     }
+        //     var cactusType = Math.floor(Math.random() * 6) + 1; // Random cactus type between 1 and 6
+
+        //     this.spawnCactus(cactusType); 
+        //     this.cooldown = 0;
+        //     this.userInteraction = spawning.cactus; 
+        //     this.sendToServer(spawning.cactus, cactusType);
         // }
+    //     this.cactusCooldown -= 0.1;
+    //     if (this.cactusCooldown  <= 0)
+    //     {
+    //         this.cactusCooldown = this.cactusSpawnInterval + Math.random() * 0.5;
+    //         if (Math.random() > 0.3) {
+    //             this.spawnCactus();
+    //         }
+    //         else {
+    //             this.spawnBird();
+    //         }
+    //     }
     },
 
     turningDelayTrue: function()
@@ -294,18 +322,20 @@ var dl = cc.Layer.extend({
     {
         this.gameState = "warmUp";
 
-        cc.log("warmingUP");
+        // cc.log("warmingUP");
 
         this.spriteDino.stopAllActions();
-        var jumpMotion = this.buildJumpAction();
-        var seqAction = cc.sequence(jumpMotion, cc.callFunc(this.changingToWarmUp, this));
-        this.spriteDino.runAction(seqAction);
+        // var jumpMotion = this.buildJumpAction(0.7);
+        // var seqAction = cc.sequence(cc.callFunc(this.changingToWarmUp, this));
+        //this.spriteDino.runAction(seqAction);
 
+        this.dinoState = "jump";
+        this.jump();    
     },
 
     changingToWarmUp: function()
     {
-        cc.log("changingToWarmUp");
+        // cc.log("changingToWarmUp");
         this.hideMainMenuObj();
 
         //dino run
@@ -319,27 +349,27 @@ var dl = cc.Layer.extend({
 
     movingAtStart: function() 
     {
-        cc.log(this.startDuration);
+        // cc.log(this.startDuration);
         this.spriteTrack3.setVisible(true);
         var moving = cc.MoveTo.create(this.startDuration,cc.p(this.sizeWidth, 200));
        
         var movingMotion = cc.sequence(moving,cc.callFunc(this.endMoving, this));
 
-        cc.log("movingAtStart");
+        // cc.log("movingAtStart");
 
         this.start.runAction(movingMotion);
     },
     
     endMoving: function()
     {
-        cc.log("endMoving 1");
+        // cc.log("endMoving 1");
         this.removeChild(this.start);
-        cc.log("endMoving 2");
+        // cc.log("endMoving 2");
         var scaling = cc.scaleTo(0.5, 1, 1);
-        cc.log("endMoving 3");
+        // cc.log("endMoving 3");
         var scaleMotion = cc.sequence(scaling,cc.callFunc(this.gameStart,this));
 
-        cc.log("endMoving 4");
+        // cc.log("endMoving 4");
 
         this.runAction(scaleMotion);
     },
@@ -496,12 +526,11 @@ var dl = cc.Layer.extend({
         // {
         //     this.blinkAction();
         // }
-       
 
-        this.userInteraction = changingDinoStateForUser.nothing;
         if (this.gameState == "gameOver") 
         {
             this.userInteraction = this.gameState;
+            this.sendToServer(this.userInteraction);
             return;
         }
 
@@ -511,7 +540,8 @@ var dl = cc.Layer.extend({
             {
                 this.warmingUp();
                 this.userInteraction = changingDinoStateForUser.warmingUp;
-                cc.log(changingDinoStateForUser.warmingUp);
+                // cc.log(changingDinoStateForUser.warmingUp);
+                this.sendToServer(this.userInteraction);
             }
         }
         else if (this.gameState == "running")
@@ -526,12 +556,14 @@ var dl = cc.Layer.extend({
                         this.jump();
                         this.spriteDino.setSpriteFrame("dino_jump.png");
                         this.userInteraction = changingDinoStateForUser.jump;
+                        this.sendToServer(this.userInteraction);
                     }
                     
-                    cc.log("Key space pressed");
+                    // cc.log("Key space pressed");
                 }
                 else if (key === cc.KEY.down) 
                 {
+                    cc.log("DownPressed" + this.downKeyPressed);
                     this.downKeyPressed = true;
         
                     if (this.dinoState === "run")
@@ -540,37 +572,54 @@ var dl = cc.Layer.extend({
                         this.dinoState = "duck";
                         this.duck();
                         this.userInteraction = changingDinoStateForUser.duck;
+                        this.sendToServer(this.userInteraction);
                     }
                     else if (this.dinoState === "jump") {
                         this.userInteraction = changingDinoStateForUser.cancelJump;
                         // print("co Jump");
                         this.cancelJump();
+                        this.sendToServer(this.userInteraction);
                     }
                     
-                    cc.log("Key down pressed");
+                    // cc.log("Key down pressed");
                 }
             }
             else if (myRole == UserJob.guest)
             {
                 if(key == cc.KEY["["])
                 {
-                    var cactusType = Math.floor(Math.random() * 6) + 1; // Random cactus type between 1 and 6
+                    // this.isAutoSpawn = false;
+                    if(this.cooldown >= 5)
+                    {
+                        var cactusType = Math.floor(Math.random() * 6) + 1; // Random cactus type between 1 and 6
 
-                    this.spawnCactus(cactusType); 
-                   
-                    this.sendToServer(spawning.cactus, cactusType);
+                        this.spawnCactus(cactusType); 
+                        this.cooldown = 0;
+                        this.userInteraction = spawning.cactus; 
+                        this.sendToServer(spawning.cactus, cactusType);
+                    }
                 }
                 else if(key == cc.KEY["]"])
-                {
-                    var birdHeight = 202 + Math.random() * 150;
-                    this.spawnBird(birdHeight); 
-                    this.sendToServer(spawning.bird, birdHeight);
+                { 
+                    if (this.cooldown >= 5)
+                    {
+                        // var birdHeight = 202 + Math.random() * 150;
+                        var birdHeight = 202;
+                        //cc.log("Guest birdHeight = " + birdHeight);
+                        this.birdHeight = birdHeight;
+                        //this.birdHorizontalDistance = 
+                        this.spawnBird(); 
+                        this.userInteraction = spawning.bird; 
+                        this.cooldown = 0;
+                        this.sendToServer(spawning.bird, birdHeight);
+                    }
                 }
             }
            
         }
-        if(myRole == "Host")
-            this.sendToServer(this.userInteraction);
+
+        // cc.log("this.userinteratciom" + this.userInteraction)
+            
         //sendMessageInGameRoom(this.userInteraction);
         // else 
         // { 
@@ -581,7 +630,7 @@ var dl = cc.Layer.extend({
 
     onKeyReleased: function(key)
     {
-        this.userInteraction = changingDinoStateForUser.nothing;
+
         if (key === cc.KEY.space) 
         {   
             if (this.dinoState == "jump") {
@@ -597,22 +646,24 @@ var dl = cc.Layer.extend({
             }
             
         }
-        else if (key === cc.KEY.down) 
+        else  if (key === cc.KEY.down) 
         {
             this.downKeyPressed = false; 
             this.userInteraction = changingDinoStateForUser.keyReleased;
             if(this.gameState == "gameOver") return;
             
-            if (this.dinoState != "jump")
+            if (this.dinoState == "duck")
             {
                 this.dinoState = "run";
                 this.run();
                 this.userInteraction = changingDinoStateForUser.running;
             }
-            cc.log("Key down released");
-        }
-        if(myRole == "Host")
             this.sendToServer(this.userInteraction);
+
+            // cc.log("Key down released");
+        }
+
+
     },
 
     setupDinoAnim: function() {
@@ -647,17 +698,34 @@ var dl = cc.Layer.extend({
         
     },
 
-    buildJumpAction: function()
-    {
-        var jumpAnimate = cc.animate(this.animJump);
+//    calcNormalJumpDuration: function()
+//    {
+//         return 2*Math.sqrt((2*this.jumpHeight) / 3000);
+//    },
 
-        var jumpUp = cc.moveBy(this.jumpDuration * 0.5, cc.p(0, this.jumpHeight)).easing(cc.easeOut(2.0));
+    // buildJumpAction: function(timeToJump)
+    // {
+    //     //cc.log("TimeToJump = " + timeToJump);
 
-        var jumpDown = cc.moveBy(this.jumpDuration * 1, cc.p(0, -this.jumpHeight)).easing(cc.easeIn(2.0));
+    //     var jumpAnimate = cc.animate(this.animJump);
+        
+    //     var jumpUp = cc.moveBy(timeToJump/2, cc.p(0, this.jumpHeight)).easing(cc.easeInOut(1));
 
-        var jumpMotion = cc.sequence(jumpAnimate, jumpUp, jumpDown);
+    //     var jumpDown = cc.moveBy(timeToJump/2, cc.p(0, -this.jumpHeight)).easing(cc.easeSineIn(1.0));
+
+    //     var jumpMotion = cc.sequence(jumpAnimate, jumpUp, jumpDown);
     
-        return jumpMotion;
+    //     return jumpMotion;
+    // },
+
+    dinoV0: 0,
+    dinoG: 3000,
+    playSpeed: 1,
+    dinoVcacelJump: 1200,
+
+    setPlaySpeed: function (numbers)
+    {
+        this.playSpeed = numbers;
     },
 
     blinkAction: function()
@@ -665,37 +733,67 @@ var dl = cc.Layer.extend({
         this.spriteDino.runAction(cc.animate(this.animBlink));
     },
 
+    startJumpTime: 0,
+    buildJumpFx: function()
+    {
+        this.startJumpTime = Date.now();
+
+        this.dinoV0 = 1200;
+
+        return cc.animate(this.animJump);
+    },
+
+    timeStartJump: 0,
+
     jump: function() {
         this.spriteDino.stopAllActions();
 
-        var jumpMotion = this.buildJumpAction();
+        this.timeStartJump = Date.now();
 
-        var seqAction = cc.sequence(jumpMotion, cc.callFunc(this.endJump, this));
+        //var jumpMotion = this.buildJumpAction(jumpDuration);
+
+        //var seqAction = cc.sequence(jumpMotion, cc.callFunc(this.endJump, this));
        
-        this.spriteDino.runAction(seqAction);
-        //this.spriteDino.runAction(cc.animate(this.animJump));
+        //this.spriteDino.runAction(seqAction);
+
+        this.spriteDino.runAction(this.buildJumpFx());
     },
 
-    cancelJump: function() {
-        var timeToJump = Math.sqrt((2*(this.spriteDino.getPositionY() - 200)) / 18000);
-        cc.log(timeToJump);  
-        this.spriteDino.stopAllActions();
+    cancelJump: function() 
+    {
+        this.dinoState = "cancelJump";
+        //var timeToJump = Math.sqrt((2*(this.spriteDino.getPositionY() - 200)) / 18000);
+        // cc.log(timeToJump);  
+        //this.spriteDino.stopAllActions();
         //do cao hien tại suy ra thời gian chạm đất
-        var jumpDown = cc.moveTo(timeToJump, cc.p(100, 200));
-        var AfterJump = cc.callFunc(function() {
-            if (!this.downKeyPressed) { 
-                this.dinoState = "run"; 
-                this.run();
-            } 
-            else {
-                this.dinoState = "duck";
-                this.duck(); 
-            }
-        }, this);
-    
-        this.spriteDino.runAction(cc.sequence(jumpDown, AfterJump));
+        //var jumpDown = cc.moveTo(timeToJump, cc.p(100, 200));
+        // var AfterJump = cc.callFunc(function() {
+        //     if (!this.downKeyPressed) { 
+        //         this.dinoState = "run"; 
+        //         this.run();
+        //     } 
+        //     else {
+        //         this.dinoState = "duck";
+        //         this.duck(); 
+        //     }
+        // }, this);
+        // cc.log("DownKeyPressed: " + this.downKeyPressed);
+        // this.spriteDino.runAction(cc.sequence(jumpDown, AfterJump));
     },
     
+    endCancelJump : function()
+    {
+        if (!this.downKeyPressed) 
+        { 
+            this.dinoState = "run"; 
+            this.run();
+        } 
+        else 
+        {
+            this.dinoState = "duck";
+            this.duck(); 
+        }
+    },
 
     endJump: function() {
         // cc.log(this.spriteDino.getPosition());
@@ -722,9 +820,9 @@ var dl = cc.Layer.extend({
         this.scheduleUpdate();
     },
 
-    moveTrack: function(speed) {
-        this.spriteTrack1.x -= speed;
-        this.spriteTrack2.x -= speed;
+    moveTrack: function(speed, dt) {
+        this.spriteTrack1.x -= speed* dt;
+        this.spriteTrack2.x -= speed* dt;
     
         if (this.spriteTrack1.x < -this.spriteTrack1.getContentSize().width / 2) {
             this.spriteTrack1.x = this.spriteTrack2.x + this.spriteTrack2.getContentSize().width;
@@ -735,28 +833,67 @@ var dl = cc.Layer.extend({
         }
     },
 
+    spawnCactusDY: 200,
+
     //cactusSpawnTime
     spawnCactus: function(cactusType) 
     {
         if (this.gameState != "running") return;
-
+        // var cactusType = Math.floor(Math.random() * 6) + 1;
        
         var cactusSpriteFrameName = "cactus_" + cactusType + ".png";
         var cactusSprite = new cc.Sprite(cc.spriteFrameCache.getSpriteFrame(cactusSpriteFrameName));
         
         cactusSprite.setAnchorPoint(0.5, 0);
-        cactusSprite.setPosition(cc.director.getWinSize().width + cactusSprite.getContentSize().width, 155); 
+
+        cactusSprite.setPosition(cc.director.getWinSize().width, 
+                                cc.director.getWinSize().height + this.spawnCactusDY);
 
         this.cacti.push(cactusSprite);
+
         this.addChild(cactusSprite);
 
     },
-    moveCactus: function(speed) {
 
-        for (var i = this.cacti.length - 1; i >= 0; i--) {
+    distanceToSpawnCactus: 15 / 0.017,
+    // count: 0,
+
+    setDistanceToSpawnCactus: function(delay)
+    {
+        var distance = cc.director.getWinSize().height + this.spawnCactusDY - 155;
+        var totalTime = (distance/ (15/ 0.017)) * 1000; 
+        var guestTime  = totalTime  - delay; 
+        var dropSpeed = distance *1000/ guestTime;
+        //var time = size/(this.distanceToSpawnCactus * tmp) - delay;
+        //cc.log ("setDistanceToSpawnCactus - time: " + time);
+        this.distanceToSpawnCactus = dropSpeed;
+        //cc.log ("setDistanceToSpawnCactus - distanceToSpawnCactus: " + this.distanceToSpawnCactus);
+    },
+
+    moveCactus: function(speed, dt) {
+
+        for (var i = this.cacti.length - 1; i >= 0; i--) 
+        {
             var spriteCactus = this.cacti[i];
-            spriteCactus.x -= speed;
-            if (spriteCactus.x < -spriteCactus.getContentSize().width) {
+            if (spriteCactus.y <= 155)
+            {
+                spriteCactus.x -= speed * dt;
+                // this.count = 0;
+            }
+            else 
+            {
+                // this.count += 0.017;
+                // cc.log(this.count);
+                spriteCactus.y -= this.distanceToSpawnCactus * dt;
+
+                if (spriteCactus.y < 155)
+                {
+                    spriteCactus.y = 155;
+                }
+            }
+
+            if (spriteCactus.x < -spriteCactus.getContentSize().width) 
+            {
                 spriteCactus.removeFromParent();
 
                 //this.cacti.splice(this.cacti.indexOf(spriteCactus), 0);
@@ -776,7 +913,38 @@ var dl = cc.Layer.extend({
         // }
     },
 
-    spawnBird: function(birdHeight) {
+    birdDistanceDrop: 5,
+    birdDropSpeedY: 5/0.017,
+    birdDistance: 500,
+    birdHeight: 0, 
+    birdHorizontalDistance: 5,
+    birdDropSpeedX: 5/0.017,
+
+    setBird: function(height,delay)
+    {
+        cc.log ("delay = " + delay);
+        cc.log("height = " + height);
+        this.birdHeight  = height;
+
+        var distance = this.birdDistance;
+        
+        var totalTimeDrop = (distance / (5/0.017)) * 1000;
+        cc.log("totalTimeDrop = " + totalTimeDrop);
+        // cc.log ("totalTime")
+        var guestTimeDrop = (totalTimeDrop  - delay); 
+        cc.log("guestTimeDrop = " + guestTimeDrop); 
+        var dropSpeed  = distance*1000/ guestTimeDrop;
+        cc.log("Drop Speed = " + dropSpeed);
+        this.birdDropSpeedY = dropSpeed;
+
+        this.birdDropSpeedX = (5/0.017)*totalTimeDrop/guestTimeDrop;
+
+        //cc.log(distance / dropSpeed);
+    },
+
+    widthBird: 500,
+
+    spawnBird: function() {
         if (this.gameState != "running") return;
         
         var size = cc.director.getWinSize();
@@ -784,11 +952,12 @@ var dl = cc.Layer.extend({
             return;
         }
         this.spriteBird.setVisible(true);
-        this.spriteBird.setPosition(size.width + this.spriteBird.getContentSize().width + 200, birdHeight);
+        this.spriteBird.setPosition(size.width + this.spriteBird.getContentSize().width, this.birdHeight + this.birdDistance);
         
        
         // this.spriteBird.runAction(cc.sequence(birdFlyAction, removeBird));
     },
+
 
     // createCloud: function(xPosition) {
     //     // var size = cc.director.getWinSize();
@@ -800,10 +969,43 @@ var dl = cc.Layer.extend({
     
     //     // return cloudSprite;
 
-    moveBird: function(speed) {
+    moveBird: function(speed, dt) {
         // var birdAnimation = new cc.Animation(this.birdFrames, 0.2);
         // var birdAnimate = cc.animate(birdAnimation).repeatForever();
-        this.spriteBird.x -= speed * 1.3 ;
+        // var timeToDropX = 
+
+        //this.birdHorizontalDistance = (cc.director.getWinSize().width + this.spriteBird.getContentSize().width )/ (this.birdDistance / this.birdDistanceDrop) * dt;
+
+        if (this.spriteBird.y  > this.birdHeight) 
+        {
+            //this.spriteBird.y -= vy*dt;
+            this.spriteBird.y -= this.birdDropSpeedY * dt;
+            // cc.log("dtMobe  = " + dt);
+            //this.spriteBird.y -= this.birdDistanceDrop;
+            //this.birdDistanceDrop += (this.birdDistance * dt);
+            //cc.log("spireBirdY = " + this.spriteBird.y);
+            // this.birdDistance -= this.birdDistanceDrop;
+
+            this.spriteBird.x -= this.birdDropSpeedX * dt;
+            //cc.log("spireBirdX = " + this.spriteBird.x);
+
+
+            /*
+            if (this.spriteBird.x <= cc.director.getWinSize().width)
+            {
+                this.spriteBird.x = cc.director.getWinSize().width + this.spriteBird.getContentSize().width;
+            }
+                */
+
+            if (this.spriteBird.y <= this.birdHeight)
+            {
+                this.spriteBird.y = this.birdHeight;
+            }
+        }
+        else
+        {
+            this.spriteBird.x -= speed * dt;
+        }
 
 
 
@@ -833,13 +1035,17 @@ var dl = cc.Layer.extend({
         var dinoBox = this.spriteDino.getBoundingBox();
 
         this.cacti.forEach((cactus) => {
-            if (cc.rectIntersectsRect(dinoBox, cactus.getBoundingBox())) {
+            if (cc.rectIntersectsRect(dinoBox, cactus.getBoundingBox()) 
+                                && myRole == "Host") 
+            {
                 this.gameOver();
             }
         });
 
         this.birds.forEach((bird) => {
-            if (bird.isVisible() && cc.rectIntersectsRect(dinoBox, bird.getBoundingBox())) {
+            if (bird.isVisible() && cc.rectIntersectsRect(dinoBox, bird.getBoundingBox())
+                                && myRole == "Host") 
+            {
                 this.gameOver();
             }
         });
@@ -849,11 +1055,15 @@ var dl = cc.Layer.extend({
     {
         this.gameState = "gameOver";
         this.cloudSpeed = 50;
-        this.trackSpeed = 9.5;
-        this.cactusSpeed = 1; 
+        this.trackSpeed = 9.5/ 0.017;
+        this.cactusSpeed = 1/0.017; 
+        this.birdDropSpeedX = 5/0.017; 
+        this.birdDropSpeedY = 5/0.017;
+        this.cooldown = 5;
+        this.currentTime = 0;
         // this.pauseTarget(this.spawnCactus); 
         //this.unscheduleUpdate();
-        this.cactusSpawnInterval = 1;
+        // this.cactusSpawnInterval = 1;
         this.cacti.forEach(cactus => cactus.pause());
         this.birds.forEach(bird => bird.pause());
         this.spriteDino.pause();
@@ -861,35 +1071,102 @@ var dl = cc.Layer.extend({
         this.spriteCloud2.pause(); 
         this.spriteCloud3.pause();
         this.spriteDino.setSpriteFrame("dino_dead.png");
-        cc.log('Game Over!');
+        // cc.log('Game Over!');
         // Restart Here KHANG
         this.spriteGameOver.setVisible(true);
         this.spriteReset.setVisible(true);
+
+        if (myRole == UserJob.host)
+        {
+            this.userInteraction = gameState.gameOver;
+            this.sendToServer(this.score.toString());
+        }
     },
 
-    increaseGameSpeed: function() {
-        var x = 1.1; 
-        this.trackSpeed *= x; 
+    // velocityTrack: 1.1/ 0.017, 
+
+    increaseGameSpeed: function() 
+    {
+        //var x = this.velocityTrack * dt; 
+        this.trackSpeed *= 1.1; 
         // this.cactusSpeed = this.cactusSpeed * (1 / x); 
         // this.birdSpeed *= 1.1; 
-        this.cactusSpawnInterval = Math.max(this.cactusSpawnInterval * 0.825, 0.4);  
+        // this.cactusSpawnInterval = Math.max(this.cactusSpawnInterval * 0.825, 0.4);  
     },
+
+    currentTime: 0, 
     
     update: function(dt)
     {
-
+        // cc.log(dt);
         //this.gameTime += dt;
 
         // dy += v0*dt;
         // v0 -= g*dt;
+        // cc.log(dt);
+        this.currentTime += dt;
+        time += (dt * 1000);
         // this.givenNumbers = this.changingNumber(this.givenNumbers);
-        if(this.gameState == "running")
+        // cc.log (this.cooldown);
+        if (this.cooldown <= 5)
         {
-            //this.schedule(this.spawnCactus, this.cactusSpawnInterval);
-            //this.schedule(this.spawnBird, this.birdSpawnInterval);
-            this.moveBird(this.trackSpeed);
-            this.moveTrack(this.trackSpeed);
-            this.moveCactus(this.trackSpeed);
+            if (myRole == UserJob.guest)
+            {
+                this.cooldown += dt; 
+                // cc.log(this.cooldown); 
+            }
+        }
+
+        if (this.gameState == "running")
+        {
+            if ( this.currentTime >= 0.1)
+            {
+                this.score += 1; 
+                // cc.log(this.score);  
+                this.currentTime = 0;
+                this.theNumber(this.score); 
+            }
+            if (this.dinoState == "jump")
+            {
+
+                this.spriteDino.y += this.dinoV0*dt * this.playSpeed;
+                this.dinoV0 -= this.dinoG*dt *this.playSpeed;
+
+                if (this.dinoV0 <= 0 && this.startJumpTime > 0)
+                {
+                    var timeToTop = Date.now() - this.startJumpTime; 
+                    cc.log("DurationGetToTop = " + timeToTop);
+                    this.startJumpTime = 0;
+                    this.playSpeed = 1;
+                }
+                if (this.spriteDino.y <= 200)
+                {
+                    this.spriteDino.y = 200;
+
+                    this.endJump();
+
+                    // cc.log("Jump duration = " + (Date.now() - this.timeStartJump));
+                }
+            }
+            else if (this.dinoState == "cancelJump")
+            {
+                this.spriteDino.y -= this.dinoVcacelJump *dt; 
+
+                if (this.spriteDino.y <= 200)
+                {
+                    this.spriteDino.y = 200;
+
+                    this.endCancelJump();
+
+                    //cc.log("Jump duration = " + (Date.now() - this.timeStartJump));
+                }
+            }
+
+            // this.schedule(this.spawnCactus, this.cactusSpawnInterval);
+            // this.schedule(this.spawnBird, this.birdSpawnInterval);
+            this.moveBird(this.trackSpeed, dt);
+            this.moveTrack(this.trackSpeed, dt);
+            this.moveCactus(this.trackSpeed, dt);
             this.updateClouds(dt);
             this.hitBox();
             //this.theNumber(this.score += 1); 
@@ -898,13 +1175,34 @@ var dl = cc.Layer.extend({
                 this.lastScore = this.score;  
             }
             // setTimeout(this.score += 1, 2000);
-            this.theNumber(this.score);
             // this.score += 1;
 
         }
         else if(this.gameState == "warmUp")
         {
             // this.
+            if (this.dinoState == "jump")
+            {
+                this.spriteDino.y += this.dinoV0*dt * this.playSpeed;
+                this.dinoV0 -= this.dinoG*dt *this.playSpeed;
+
+                if (this.dinoV0 <= 0 && this.startJumpTime > 0)
+                    {
+                        var timeToTop = Date.now() - this.startJumpTime; 
+                        cc.log("DurationGetToTop = " + timeToTop);
+                        this.startJumpTime = 0;
+                        this.playSpeed = 1;
+                    }
+                if (this.spriteDino.y <= 200)
+                {
+                    this.spriteDino.y = 200;
+
+                    this.endJump();
+                    this.changingToWarmUp();
+
+                    cc.log("Jump duration = " + (Date.now() - this.timeStartJump));
+                }
+            }
 
         }
       
@@ -912,10 +1210,41 @@ var dl = cc.Layer.extend({
     
     sendToServer: function(message, moreInfo)
     {
-        if (moreInfo)
-            sendMessageToSpawnStuff(message,moreInfo);
-        else
-            sendMessageInGameRoom(message);
+        // cc.log("sendToServer - this.userInteraction = " + this.userInteraction);
+        switch(this.userInteraction)
+        {
+            case gameState.gameOver: 
+                sendResultToUser(message);
+                break;
+
+            case spawning.bird: 
+                cc.log("Bird: " + message + "; " + "BirdHeight: " + moreInfo);
+                sendMessageToSpawnStuff(message,moreInfo);
+                break; 
+
+            case spawning.cactus: 
+                cc.log("Cactus: " + message + "; " + "CatusType: " + moreInfo);
+                sendMessageToSpawnStuff(message,moreInfo);
+                break; 
+
+            case gameState.windowOpen: 
+                // cc.log("windowOpen: " + message + "; " + "time: " + moreInfo);
+                sendWindowToUser(message,moreInfo); 
+                break; 
+            
+            case gameState.windowClose: 
+                // cc.log("windowClose: " + message + "; " + "time: " + moreInfo);
+                sendWindowToUser(message, moreInfo);
+                break;
+
+            default: 
+                cc.log("Message:" + message);
+                sendMessageInGameRoom(message);
+        }
+        // if (moreInfo)
+        //     sendMessageToSpawnStuff(message,moreInfo);
+        // else
+        //     sendMessageInGameRoom(message);
     },
 
 });

@@ -21,16 +21,24 @@ var MyLayer = cc.Layer.extend({
         // 2. add your codes below...
         // add a label shows "Hello World"
         // create and initialize a label
-        this.helloLabel = new cc.LabelTTF("Hello World", "Impact", 38);
+        this.helloLabel = new cc.LabelTTF("Pres 1 to start", "Impact", 38);
         // position the label on the center of the screen
         this.helloLabel.setPosition(size.width / 2, size.height - 40);
+        this.helloLabel.setFontFillColor(cc.color(105,105,105));
         // add the label as a child to this layer
         this.addChild(this.helloLabel, 5);
 
         this.cmdLabel = new cc.LabelTTF(">_", "Impact", 30);
+        this.cmdLabel.setFontFillColor(cc.color(105,105,105));
         this.cmdLabel.setPosition((size.width / 2) - 90, size.height - 100);
         this.cmdLabel.setAnchorPoint(0, 1);
-        this.addChild(this.cmdLabel);
+        this.addChild(this.cmdLabel,0);
+
+        this.start = new cc.Sprite("White.jpg");
+        this.start.setAnchorPoint(0,0);
+        this.start.setPosition(0,0); 
+        this.start.setScale(10,1);   
+        this.addChild(this.start,-1);
 
         //setup keyboard input
         this.keyLogger = "";
@@ -49,6 +57,38 @@ var MyLayer = cc.Layer.extend({
 
     },
 
+    utf8: function (number)
+    {
+        //letters = ["a", "i", "e", "o","u", "y"]
+        if (this.keyLogger.length != 0)
+        {
+            var preCharacter = this.keyLogger[this.keyLogger.length - 1];
+            var letter = vnLetterVN[preCharacter]; 
+            if (letter)
+            {
+                var letterWithSign = vnLetterVN[preCharacter][number]; 
+                if (letterWithSign)
+                {
+                    this.keyLogger = this.keyLogger.substring(0, this.keyLogger.length - 1);
+                    this.keyLogger += letterWithSign; 
+                }
+                else 
+                {
+                    this.keyLogger += number;
+                }
+            }
+            else 
+            {
+                this.keyLogger += number; 
+            }
+        }
+        else 
+        {
+            this.keyLogger += number;
+        }
+        
+    },
+
     onKeyPressed: function(key)
     {
         // simple CLI (command-line interface)
@@ -56,7 +96,16 @@ var MyLayer = cc.Layer.extend({
         if (key == cc.KEY.space || 
             (key >= cc.KEY["0"] && key <= cc.KEY["9"]))
         {
-            this.keyLogger += String.fromCharCode(key);
+            if(cc.KEY.space == key)
+            {
+                this.keyLogger += String.fromCharCode(key);
+            }
+            else 
+            {
+                this.utf8( String.fromCharCode(key));
+            }
+            
+            
         }
         else if (key >= cc.KEY.a && key <= cc.KEY.z)
         {
@@ -139,6 +188,7 @@ var MyLayer = cc.Layer.extend({
             case "pm":
                 {
                     sendReqMessage(args[1], args[2]);
+                    //sendReqMessage(args[1], args[2]);
                 }
                 break;
 
@@ -166,7 +216,7 @@ var MyLayer = cc.Layer.extend({
                     
                     if(myRole == "Host")
                     {
-                        cc.log(myRole);
+                        cc.log("myRole =" + myRole);
                         sendReqToRunDinoGame();
                     }
                     break;
@@ -182,6 +232,23 @@ var MyLayer = cc.Layer.extend({
             case "user":
                 {
                     sendUserInfo();
+                    break;
+                }
+
+            case "host": 
+                {  
+                    connectToMyServer();
+                    setTimeout(function() {sendLogin("phuc", "phuccc");}, 1000);
+                    setTimeout(function() {sendCreateGameroomrq("1", "1");}, 2000);
+                    
+                    break;
+                }
+            
+            case "guest": 
+                {
+                    connectToMyServer();
+                    setTimeout(function() {sendLogin("john", "jimmmm");}, 1000); 
+                    setTimeout(function() {sendReqToJoinGameRoom("1", "1");},2000);
                     break;
                 }
             
